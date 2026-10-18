@@ -1013,7 +1013,7 @@ function partModel(k){
 }
 // 組み立て台のケース内での取り付け位置（ケースのローカル座標）
 const PLACE = {
-  mb:[0,0.2,0], cpu:[-0.05,0.215,-0.04], cooler:[-0.05,0.225,-0.04], ram:[0.1,0.205,0],
+  mb:[0,0.2,0], cpu:[-0.05,0.215,-0.04], cooler:[-0.05,0.2295,-0.04], ram:[0.1,0.205,0],
   storage:[-0.1,0.215,0.14], gpu:[0,0.214,-0.14], psu:[0,0,-0.12], hdd:[0.12,0.5,0.05], fan:[0,0.6,0.22],
 };
 
@@ -1445,6 +1445,43 @@ function openShip(){
     Object.entries(SHIP).map(([k,s]) => `<button class="btn ${S.ship===k?'on':''}" data-act="setShip" data-arg="${k}">${S.ship===k?'✅ ':''}${s.name}　<span class="gold">${yen(s.cost)}</span>／${s.days}日${s.ins?'／配送事故を補償':''}</button>`).join('') +
     `<button class="btn primary" data-act="shipNow" ${S.ship?'':'disabled'}>📦 発送する</button>`);
 }
+// 注文の用途に合っているかを評価（配信・メモリ・ストレージ・予算の考え方）
+function orderNeeds(o){
+  const t = (o.letter || '') + ' ' + (o.job || '');
+  return {
+    ram: /メモリ|Docker|仮想|機械学習|3D|CAD|プラグイン|データ/.test(t) ? 32 : 0,
+    storage: /ストレージ|大容量/.test(t) ? 1000 : 0,
+    stream: /配信|画質|フレームレート|FPS|大会|4K/.test(t),
+    spend: /気にしません|性能だけ/.test(t),
+    cheap: /安い|安く|貯金|お小遣い|なるべく安/.test(t),
+  };
+}
+function partGB(p){ const m = (p && p.name || '').match(/(\d+)\s*(TB|GB)/i); if(!m) return 0; return m[2].toUpperCase() === 'TB' ? +m[1] * 1000 : +m[1]; }
+function fitReport(o){
+  const n = orderNeeds(o), notes = [];
+  let fit = 0;
+  const margin = perf() - (o.minPerf || 0);
+  fit += Math.max(-10, Math.min(15, margin / 2));
+  if(n.stream){
+    if(margin < 8){ fit -= 15; notes.push('配信・高画質の用途なのに、性能の余裕が少ない（評価 −）'); }
+    else { fit += 8; notes.push('配信・高画質の要望に応えた（評価 +）'); }
+  }
+  if(n.ram){
+    const gb = get('ram') ? partGB(get('ram')) : 0;
+    if(gb < n.ram){ fit -= 15; notes.push(`メモリが少ない（${gb}GB。${n.ram}GB以上の要望）（評価 −）`); }
+    else { fit += 8; notes.push('メモリの容量が要望に合っている（評価 +）'); }
+  }
+  if(n.storage){
+    const st = get('storage') || get('hdd');
+    const gb = st ? partGB(st) : 0;
+    if(gb < n.storage){ fit -= 10; notes.push(`ストレージが少ない（${gb}GB。1TB以上の要望）（評価 −）`); }
+    else { fit += 5; notes.push('ストレージの容量が要望に合っている（評価 +）'); }
+  }
+  const tot = total();
+  if(n.spend && tot < o.budget * 0.6){ fit -= 15; notes.push('「予算は気にしない」と言われたのに、構成が安すぎる（評価 −）'); }
+  if(n.cheap && tot > o.budget * 0.9){ fit -= 8; notes.push('安さ重視なのに、予算ぎりぎりまで使った（評価 −）'); }
+  return {fit: Math.round(fit), notes};
+}
 function finish(){
   if(!S.ship) return;
   const sh = SHIP[S.ship], o = curO();
@@ -1452,10 +1489,11 @@ function finish(){
   const parts = (o.repair && S.repair) ? ((PARTS[S.repair.key].find(p => p.id === S.cart[S.repair.key]) || {price:0}).price) : total();
   let q = 100 - S.damage*8 - S.packMiss*10 - S.testFail*12 - (S.shock ? 20 : 0);
   q = Math.max(0, q);
-  const stars = q>=90 ? 5 : q>=75 ? 4 : q>=55 ? 3 : q>=35 ? 2 : 1;
+  const fr = o.repair ? {fit:0, notes:[]} : fitReport(o);
+  const stars = Math.max(1, Math.min(5, (q>=90 ? 5 : q>=75 ? 4 : q>=55 ? 3 : q>=35 ? 2 : 1) + Math.round(fr.fit / 25)));
   const tip = stars * 1000;
   const late = o.repair ? (S.day || 1) - (o.repair.deadline || 0) : 0;
-  const budgetEff = o.repair ? Math.round(o.budget * (late <= 0 ? 1.3 : Math.max(0.3, 1 - 0.2*late))) : o.budget;
+  const budgetEff = o.repair ? repairPayout(o.budget, late) : o.budget;
   const profit = budgetEff + tip - parts - BOX[S.box].cost - sh.cost;
   S.dayIncome = (S.dayIncome || 0) + budgetEff + tip;
   S.dayExpense = (S.dayExpense || 0) + parts + BOX[S.box].cost + sh.cost;
@@ -1483,8 +1521,9 @@ function finish(){
       <tr><td>チップ</td><td style="text-align:right">＋${yen(tip)}</td></tr>
       <tr><td><b>利益</b></td><td style="text-align:right"><b class="${profit>=0?'ok':'ng'}">${yen(profit)}</b></td></tr>
     </table>
+    ${fr.notes.length ? '<p><b>用途との相性</b></p>' + fr.notes.map(x => `<div class="muted">・${x}</div>`).join('') : ''}
     <p class="muted">品質スコア ${q}（損傷・梱包ミス・動作テスト・配送の結果で決まる）</p>
-    ${o.repair ? `<p class="muted">修理の期限：${o.repair.deadline}日目まで。${late <= 0 ? '期限内に直したので報酬 +30%' : `期限を${late}日過ぎたので報酬を減額`}</p>` : ''}
+    ${o.repair ? `<p class="muted">修理の期限：${o.repair.deadline}日目まで。${repairLateNote(late)}</p>` : ''}
     ${got.map(a => `<div class="ok">🏆 実績解除：${a.name}（${a.desc}）</div>`).join('')}
     <button class="btn primary" data-act="nextOrder">次の任務を選ぶ</button>`, false);
 }
@@ -1524,7 +1563,7 @@ function projection(){
   const o = curO();
   const isRepair = !!(o.repair && S.repair);
   const late = isRepair ? (S.day || 1) - (o.repair.deadline || 0) : 0;
-  const rev = isRepair ? Math.round(o.budget * (late <= 0 ? 1.3 : Math.max(0.3, 1 - 0.2*late))) : o.budget;
+  const rev = isRepair ? repairPayout(o.budget, late) : o.budget;
   const parts = isRepair ? ((PARTS[S.repair.key].find(p => p.id === S.cart[S.repair.key]) || {price:0}).price) : total();
   const box = S.box ? BOX[S.box].cost : 0;
   const ship = S.ship ? SHIP[S.ship].cost : 0;
@@ -1534,7 +1573,7 @@ function projHtml(){
   const p = projection();
   const ok = p.base >= 0;
   const notes = [];
-  if(p.isRepair) notes.push(p.late <= 0 ? '修理は期限内なので報酬 +30%' : `修理は期限を${p.late}日過ぎているので報酬が減額`);
+  if(p.isRepair) notes.push('修理：' + repairLateNote(p.late));
   if(!S.box) notes.push('箱は未選択（0円で計算）');
   if(!S.ship) notes.push('送料は未選択（0円で計算）');
   return `<div class="proj" style="border:1px solid ${ok ? '#2e7d4f' : '#a33'};border-radius:10px;padding:8px 10px;margin:8px 0;text-align:left">
@@ -1548,7 +1587,7 @@ let SHELF_FILTER = {};
 const SORTS = {def:'おすすめ順', pl:'値段が安い順', ph:'値段が高い順', name:'名前順', perf:'性能が高い順', stock:'在庫が多い順', watt:'ワット数が多い順'};
 // パーツごとの独自カテゴリー（棚の上で絞り込む）
 const FILTERS = {
-  cpu: [['すべて', ()=>true], ['AM4', p=>p.socket==='AM4'], ['AM5', p=>p.socket==='AM5'], ['LGA1700', p=>p.socket==='LGA1700'], ['LGA1851', p=>p.socket==='LGA1851'], ['内蔵GPUあり', p=>!!p.igpu]],
+  cpu: [['すべて', ()=>true], ['AM4', p=>p.socket==='AM4'], ['AM5', p=>p.socket==='AM5'], ['LGA1700', p=>p.socket==='LGA1700'], ['LGA1851', p=>p.socket==='LGA1851'], ['BGA（ノート用）', p=>p.socket==='BGA（ノート用）'], ['内蔵GPUあり', p=>!!p.igpu]],
   mb: [['すべて', ()=>true], ['AM4', p=>p.socket==='AM4'], ['AM5', p=>p.socket==='AM5'], ['LGA1700', p=>p.socket==='LGA1700'], ['LGA1851', p=>p.socket==='LGA1851'], ['ITX', p=>/ITX/.test(p.name)]],
   ram: [['すべて', ()=>true], ['DDR4', p=>p.type==='DDR4'], ['DDR5', p=>p.type==='DDR5']],
   gpu: [['すべて', ()=>true], ['RTX', p=>/RTX/.test(p.name)], ['RX', p=>/RX/.test(p.name)], ['RTX 3000番代', p=>/RTX 30/.test(p.name)], ['RTX 4000番代', p=>/RTX 40/.test(p.name)], ['RTX 5000番代', p=>/RTX 50/.test(p.name)], ['RX 6000番代', p=>/RX 6/.test(p.name)], ['RX 7000番代', p=>/RX 7/.test(p.name)], ['RX 9000番代', p=>/RX 9/.test(p.name)], ['性能80以上', p=>(p.perf||0)>=80]],
@@ -2115,8 +2154,16 @@ function repairBudget(key, cart, fee){
   if(!isFinite(minPart)) return null;
   const minBox = Math.min(...Object.values(BOX).map(b => b.cost));
   const minShip = Math.min(...Object.values(SHIP).map(x => x.cost));
-  const need = minPart + minBox + minShip + 2000;
-  return Math.max(fee + 4000, Math.ceil(need / 1.3 / 100) * 100);
+  const cost = minPart + minBox + minShip;
+  return Math.max(fee + 4000, Math.ceil(cost * 1.5 / 100) * 100);
+}
+// 修理の支払い：期限内は+30%、1日遅れは据え置き、それ以上は段階的に減額（下限60%）
+function repairPayout(budget, late){
+  const m = late <= 0 ? 1.3 : late === 1 ? 1 : Math.max(0.6, 1 - 0.25*(late-1));
+  return Math.round(budget * m);
+}
+function repairLateNote(late){
+  return late <= 0 ? '期限内に直したので報酬 +30%' : late === 1 ? '1日過ぎたが報酬は据え置き' : `期限を${late}日過ぎたので報酬を減額`;
 }
 function makeRepairJob(){
   let tpl, cart, key, fee, budget;
@@ -2511,9 +2558,15 @@ const ACH = [
 let MISSION_CANDS = [];
 function openMissionChoice(){
   SFX.open();
-  MISSION_CANDS = [...openMissionChoiceQueue(), ...[...ORDER_POOL].sort(() => Math.random() - 0.5).slice(0, 3 - Math.min(1, REPAIR_Q.length))];
-  openPanel(`<h3>次の任務を選ぶ</h3><p class="muted">届いた注文から一件を選んで受けよう。</p>` +
-    MISSION_CANDS.map((o,i) => `<button class="btn" data-act="pickMission" data-arg="${i}"><b>${o.repair ? '🔧 ' : ''}${o.client}（${o.job}${o.repair && o.repair.deadline ? '・期限 ' + o.repair.deadline + '日目まで' : ''}）</b>　予算 <span class="gold">${yen(o.budget)}</span>　必要性能 ${o.minPerf}<br><span class="muted">「${o.letter}」</span></button>`).join('') +
+  const reps = REPAIR_Q.slice();
+  const orders = [...ORDER_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
+  MISSION_CANDS = [...reps, ...orders];
+  const btn = (o, i) => `<button class="btn" data-act="pickMission" data-arg="${i}"><b>${o.repair ? '🔧 ' : ''}${o.client}（${o.job}${o.repair && o.repair.deadline ? '・期限 ' + o.repair.deadline + '日目まで' : ''}）</b>　予算 <span class="gold">${yen(o.budget)}</span>　必要性能 ${o.minPerf}<br><span class="muted">「${o.letter}」</span></button>`;
+  const repHtml = reps.length ? reps.map((o, i) => btn(o, i)).join('') : '<p class="muted">預かっている修理はありません。</p>';
+  const ordHtml = orders.map((o, i) => btn(o, reps.length + i)).join('');
+  openPanel(`<h3>次の任務を選ぶ</h3><p class="muted">預かり中の修理と、組み立ての注文から好きなものを選べます。</p>` +
+    `<p><b>🔧 修理（預かり中 ${reps.length}件）</b></p>` + repHtml +
+    `<p><b>📦 組み立ての注文</b></p>` + ordHtml +
     (S.done > 0 ? `<button class="btn" data-act="closeShop">今日はここまで（店じまい）</button>` : ''), false);
 }
 function showAch(){
