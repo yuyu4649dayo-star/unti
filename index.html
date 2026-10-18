@@ -21,6 +21,8 @@ canvas{display:block;touch-action:none}
 .iconbtn{position:fixed;top:10px;width:40px;height:40px;border-radius:50%;background:#000a;border:1px solid #ffffff44;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:10;cursor:pointer;touch-action:none}
 #mailBtn{right:60px}
 #mute{right:12px}
+#ledgerBtn{right:156px}
+#clock{position:fixed;top:10px;left:10px;z-index:9;background:#000a;border:1px solid #ffffff44;border-radius:10px;padding:6px 10px;font-size:14px;color:#fff;pointer-events:none}
 #achBtn{right:108px}
 #panel{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:5}
 #pbox{background:#1a1f35;border:1px solid #2c3558;border-radius:14px;padding:20px;max-width:580px;width:100%;max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;line-height:1.7}
@@ -54,7 +56,9 @@ canvas{display:block;touch-action:none}
 <div id="hud"><div id="obj"></div><div id="total" style="font-size:14px;color:#ffd166;margin-top:4px;font-weight:bold"></div><div id="stat"></div><div id="target" style="font-size:14px;color:#7fe3ff;margin-top:4px;font-weight:bold"></div></div>
 <div id="mailBtn" class="iconbtn">📩</div>
 <div id="achBtn" class="iconbtn">🏆</div>
+<div id="ledgerBtn" class="iconbtn">📊</div>
 <div id="mute" class="iconbtn">🔊</div>
+<div id="clock" style="display:none"></div>
 <div id="tut"><div class="txt"><span class="tag"></span><span class="body"></span></div><button id="tutSkip">スキップ</button></div>
 <div id="crosshair"></div>
 <div id="prompt"></div>
@@ -537,7 +541,7 @@ document.getElementById('tutSkip').addEventListener('pointerdown', e => { e.prev
 function newState(){
   return {orderIdx:0, money:0, rep:0, phase:'order', cart:{}, damage:0,
     step:0, screws:0, screwing:false, packMiss:0, packDone:[], box:null, ship:null,
-    testFail:0, shock:false, result:null, steps:[], done:0, day:1};
+    testFail:0, shock:false, result:null, steps:[], done:0, day:1, dayIncome:0, dayExpense:0};
 }
 let S = newState();
 const get = k => PARTS[k].find(p => p.id === S.cart[k]) || null;
@@ -864,6 +868,38 @@ addBox(1.6,0.08,0.12,0x5b6070,-2,2.3,11.8); addBox(0.08,2.3,0.12,0x5b6070,-2.8,1
 addBox(1.5,2.2,0.04,0x9fd8ff,-2,1.1,11.8);
 addBox(0.12,0.08,1.6,0x5b6070,11.8,2.3,9.5); addBox(0.12,2.3,0.08,0x5b6070,11.8,1.15,8.7); addBox(0.12,2.3,0.08,0x5b6070,11.8,1.15,10.3);
 addBox(0.04,2.2,1.5,0x9fe8b0,11.84,1.1,9.5);
+// 裏の事務室（右奥の仕切りの向こう。出入り口は手前の壁の真ん中）
+wallBox(0.2,4,5,2.5,2,-9.5);  OBST.push({x0:2.4, x1:2.6, z0:-12, z1:-7});
+wallBox(5.1,4,0.2,5.05,2,-7); OBST.push({x0:2.5, x1:7.6, z0:-7.1, z1:-6.9});
+wallBox(2.6,4,0.2,10.7,2,-7); OBST.push({x0:9.4, x1:12, z0:-7.1, z1:-6.9});
+{ const sg = label('事務室'); sg.position.set(8.5, 2.6, -6.85); scene.add(sg); }
+table(10.5,-10,2.0,0.9);   // 店長の机
+let MGR_MESH_REF = null;
+{ // 店長（40代後半・小太り・バーコードヘア・椅子でだらだら）
+  const mg = new THREE.Group();
+  const bx = (w,h,d,c,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat(c)); m.position.set(x,y,z); mg.add(m); return m; };
+  const sph = (r,c,x,y,z,sx=1,sy=1,sz=1) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r,14,10), mat(c)); m.position.set(x,y,z); m.scale.set(sx,sy,sz); mg.add(m); };
+  const SHIRT = 0xc9d8ea, SKIN = 0xf0c09a, HAIR = 0x3a2e22;
+  bx(0.56,0.08,0.56,0x2a2f3c,0,0.4,0); bx(0.07,0.4,0.07,0x2a2f3c,0,0.2,0);            // 椅子
+  bx(0.46,0.5,0.36,SHIRT,0,0.76,0);                                                   // 上半身（ワイシャツ）
+  sph(0.2,SHIRT,0,0.7,0.16,1.1,0.95,0.7);                                             // お腹
+  bx(0.16,0.14,0.42,0x3a3f4d,-0.12,0.5,0.14); bx(0.16,0.14,0.42,0x3a3f4d,0.12,0.5,0.14); // 太もも
+  bx(0.13,0.42,0.13,SHIRT,-0.3,0.74,0); bx(0.13,0.42,0.13,SHIRT,0.3,0.74,0);         // 腕
+  sph(0.07,SKIN,-0.3,0.5,0.02); sph(0.07,SKIN,0.3,0.5,0.02);                          // 手
+  bx(0.1,0.3,0.02,0x8a2a2a,0,0.74,0.195);                                             // ネクタイ
+  bx(0.1,0.1,0.02,0x8a2a2a,0,0.9,0.19);
+  bx(0.09,0.09,0.09,SKIN,0,0.99,0);                                                   // 首（太め）
+  bx(0.3,0.27,0.27,SKIN,0,1.17,0);                                                    // 顔（丸顔）
+  bx(0.31,0.05,0.28,SKIN,0,1.32,0);                                                   // 頭頂（薄い）
+  bx(0.03,0.07,0.28,HAIR,-0.14,1.3,0); bx(0.03,0.07,0.28,HAIR,0.14,1.3,0);            // 横の髪
+  bx(0.22,0.012,0.04,HAIR,-0.03,1.36,0.0);                                            // バーコードの髪（左から右へ）
+  bx(0.2,0.012,0.04,HAIR,0.04,1.35,0.04);
+  bx(0.09,0.012,0.01,0x222222,-0.07,1.2,0.14); bx(0.09,0.012,0.01,0x222222,0.07,1.2,0.14); // 眼鏡
+  bx(0.02,0.012,0.01,0x222222,0,1.2,0.14);
+  bx(0.09,0.012,0.02,0x6b3a2a,0,1.09,0.14);                                           // 不満そうな口
+  sph(0.05,0xe9b08a,-0.11,1.1,0.12,0.6,0.6,0.5); sph(0.05,0xe9b08a,0.11,1.1,0.12,0.6,0.6,0.5); // ほっぺ
+  MGR_MESH_REF = mg; mg.position.set(10.5, 0, -11.1); scene.add(mg);
+}
 
 wallBox(24,4,0.2,0,2,-12);
 wallBox(24,4,0.2,0,2,12);
@@ -1097,6 +1133,8 @@ function finish(){
   const late = o.repair ? (S.day || 1) - (o.repair.deadline || 0) : 0;
   const budgetEff = o.repair ? Math.round(o.budget * (late <= 0 ? 1.3 : Math.max(0.3, 1 - 0.2*late))) : o.budget;
   const profit = budgetEff + tip - parts - BOX[S.box].cost - sh.cost;
+  S.dayIncome = (S.dayIncome || 0) + budgetEff + tip;
+  S.dayExpense = (S.dayExpense || 0) + parts + BOX[S.box].cost + sh.cost;
   S.money += profit; S.rep += stars;
   S.result = {q, stars, tip, parts, box:BOX[S.box].cost, ship:sh.cost, profit};
   S.phase = 'result';
@@ -1169,6 +1207,7 @@ function interactables(){
   const L = []; const add = (x,z,r,text,fn) => L.push({x,z,r,text,fn});
   const ph = S.phase;
   add(11.2, 9.5, 2.0, '出口（帰る）', openExit);
+  add(10.5, -8.6, 2.2, '店長に話しかける', managerTalk);
   if(waitingCust()) add(0, 6.6, 2.4, 'レジ（お客さんに対応）', openRegister);
   if(S.repair && !S.repair.done && !held && partGroups[S.repair.key] && partGroups[S.repair.key].visible)
     add(partGroups[S.repair.key].position.x, partGroups[S.repair.key].position.z, 1.1, `${LABEL[S.repair.key]}の代わりを持つ`, () => pickPart(S.repair.key));
@@ -1300,13 +1339,14 @@ const ACT = {
     const c = REGC; if(!c || c.state !== 'wait') return closePanel();
     const pid = c.item.part.id;
     if(stockOf(pid) <= 0){ SFX.error(); return closePanel(); }
-    stockAdd(pid, -1); S.money += c.item.part.price; c.state = 'leave'; REGC = null;
+    stockAdd(pid, -1); S.money += c.item.part.price; S.dayIncome = (S.dayIncome || 0) + c.item.part.price; S.dayExpense = (S.dayExpense || 0) + Math.round(c.item.part.price * 0.75);
+    c.state = 'leave'; REGC = null;
     const rv = reviewFor(c); S.rep = Math.max(0, S.rep + rv.rep);
     SFX.cash(); persist(); closePanel(); say(`${c.item.part.name}を販売した（${yen(c.item.part.price)}）。${rv.text}`);
   },
   takeRepair(){
     const c = REGC; if(!c || c.state !== 'wait') return closePanel();
-    const rp = c.repair; rp.dropDay = S.day || 1; rp.deadline = rp.dropDay + rp.wantDays;
+    const rp = c.repair; rp.dropDay = S.day || 1; rp.deadline = rp.dropDay + rp.wantDays + (staffOf('repair') > 0 ? 1 : 0);
     REPAIR_Q.push(rp); c.state = 'leave'; REGC = null;
     const rv = reviewFor(c); S.rep = Math.max(0, S.rep + rv.rep);
     SFX.click(); closePanel(); say(`修理を預かった（${rp.deadline}日目までに返す）。${rv.text}`);
@@ -1327,9 +1367,38 @@ const ACT = {
     say(`${nd}日目。期限の近い修理から確認しよう。`);
   },
   closeShopFinal(){ SFX.click(); if(S.phase !== 'result') returnCart(); persist(); S.phase = 'end'; openEnd(); },
+  hire(arg){
+    if(!SAVE.isManager) return;
+    SAVE.staff = SAVE.staff || {reg:0,restock:0,repair:0};
+    if((SAVE.staff[arg] || 0) >= 3){ SFX.error(); return say('これ以上は雇えません（上限3人）。'); }
+    SAVE.staff[arg] = (SAVE.staff[arg] || 0) + 1; persist(); SFX.click();
+    say(`${STAFF_NAME[arg]}を雇った。月給 ${yen(SALARY[arg])}（30日ごとに支払い）。`);
+    openMgmt();
+  },
+  showLedgerAct(){ openLedger(); },
+  ownerNext(){
+    stopBgm(); SFX.click();
+    SAVE.isManager = true; persist();
+    openPanel(`<h3>新しい店長</h3>
+      <p>オーナー「今日からお前が店長だ。店を任せたぞ。」</p>
+      <p>あなたがこの工房の店長になりました。事務室の机の「経営メニュー」から、人を雇えるようになります。</p>
+      <button class="btn primary" data-act="ownerDone">店に戻る</button>`, false);
+  },
+  ownerDone(){
+    SFX.click();
+    if(MGR_MESH_REF){ scene.remove(MGR_MESH_REF); MGR_MESH_REF = null; }
+    closePanel();
+    ACT.nextDay();
+    say('あなたが店長になった。事務室の机で人を雇える。');
+  },
+  introNext(){
+    SFX.click(); introIdx++;
+    if(introIdx >= INTRO.length){ gameStarted = true; closePanel(); openMissionChoice(); }
+    else showIntro();
+  },
   nextOrder(){
     SFX.click();
-    S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:S.day, orderIdx:S.orderIdx + 1});
+    S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:S.day, dayIncome:S.dayIncome, dayExpense:S.dayExpense, orderIdx:S.orderIdx + 1});
     resetWorld();
     openMissionChoice();
   },
@@ -1342,7 +1411,8 @@ const ACT = {
   closeShop(){ SFX.click(); persist(); S.phase = 'end'; openEnd(); },
   restart(){
     SFX.click(); tutIdx = -1; ORDERS = [];
-    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; writeSave();
+    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; SAVE.day = 1; SAVE.ledger = []; SAVE.isManager = false; SAVE.staff = {reg:0,restock:0,repair:0}; writeSave();
+    dayClock = 0;
     CUST.forEach(c => scene.remove(c.mesh)); CUST.length = 0; REGC = null; REPAIR_Q.length = 0; custTimer = 12;
     Object.keys(STOCK).forEach(k => delete STOCK[k]);
     S = newState(); resetWorld(); openMissionChoice();
@@ -1439,6 +1509,127 @@ document.addEventListener('dblclick', e => e.preventDefault());
 
 // ===== 開始 =====
 
+// ===== ストーリー（導入と店長） =====
+const INTRO = [
+  ['【家】', '求人サイトを眺めていた。「PC組み立て・未経験歓迎」の募集を見つけて、そのまま応募ボタンを押した。'],
+  ['【面接】', '店長「履歴書？ あーもういいよ、うち人足りてないし。採用！」'],
+  ['【初日】', '店長「今日から働いてね。仕事は教えなくてもできるでしょ？」'],
+  ['【工房】', '店長は奥の事務室でだらだらしている。…とりあえず、注文を受けてみるしかなさそうだ。'],
+];
+let introIdx = 0;
+function showIntro(){
+  const [t, b] = INTRO[introIdx];
+  openPanel(`<h3>${t}</h3><p>${b}</p><button class="btn primary" data-act="introNext">${introIdx < INTRO.length-1 ? '次へ' : '仕事を始める'}</button>`, false);
+}
+const MGR_LINES = [
+  'おう、来たか。悪いけど、そこの補充を頼むわ。俺は今ちょっと手が離せなくてな。',
+  '在庫？ 棚の数字を見りゃわかるだろ。見りゃ。',
+  'お前、仕事早いな。俺がやるより早いわ。もうちょっと任せた。',
+  'ふぁ…眠い。何かあったら起こしてくれ。',
+];
+let mgrIdx = 0;
+function managerTalk(){
+  if(SAVE.isManager) return openMgmt();
+  const line = MGR_LINES[mgrIdx % MGR_LINES.length]; mgrIdx++;
+  SFX.click(); say(`店長：「${line}」`);
+}
+
+// ===== 日付・売上表・店長の昇進・雇用 =====
+let gameStarted = false, dayClock = 0;
+const DAY_SEC = 510; // 現実時間の8分30秒で1日
+const SALARY = {reg:120000, restock:100000, repair:150000};
+const STAFF_NAME = {reg:'レジ係', restock:'補充係', repair:'修理係'};
+const STAFF_DESC = {reg:'お客さんを自動で接客（売上あり）', restock:'在庫の補充が早くなる', repair:'修理の期限が1日のびる'};
+function staffOf(k){ return (SAVE.staff && SAVE.staff[k]) || 0; }
+function restockPeriod(){ return Math.max(10, 30 - 7*staffOf('restock')); }
+function updateClock(){
+  const el = document.getElementById('clock'); if(!el) return;
+  if(!gameStarted){ el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const left = Math.max(0, Math.ceil(DAY_SEC - dayClock));
+  el.textContent = `📅 ${S.day || 1}日目　残り ${Math.floor(left/60)}:${String(left % 60).padStart(2,'0')}`;
+}
+function monthlyCosts(){
+  const pay = Object.keys(SALARY).reduce((a,k) => a + staffOf(k)*SALARY[k], 0);
+  const items = [['家賃', 150000], ['電気・ガス・水道', 40000], ['人件費（' + Object.keys(SALARY).map(k => STAFF_NAME[k] + staffOf(k) + '人').join('・') + '）', pay]];
+  return {items, total: items.reduce((a,b) => a + b[1], 0)};
+}
+function endOfDay(){
+  const d = S.day || 1;
+  const monthly = (d % 30 === 0) ? monthlyCosts() : null;
+  if(monthly) S.money -= monthly.total;
+  const sales = S.dayIncome || 0, exp = S.dayExpense || 0, fixed = monthly ? monthly.total : 0;
+  const rec = {day:d, sales, costs: exp + fixed, profit: sales - exp - fixed, money: S.money};
+  SAVE.ledger = (SAVE.ledger || []).concat([rec]).slice(-120);
+  persist();
+  if(d % 30 === 0 && S.money >= 10000000 && !SAVE.isManager) return ownerFires();
+  openDaySummary(rec, monthly);
+}
+function openDaySummary(rec, monthly){
+  const m = monthly ? `<p>月末の支払い（30日ごと）</p><ul>${monthly.items.map(([n,v]) => `<li>${n}：−${yen(v)}</li>`).join('')}</ul><p>合計 −${yen(monthly.total)}</p>` : '';
+  openPanel(`<h3>${rec.day}日目の終わり</h3>
+    <p>今日の売上 <b>${yen(rec.sales)}</b>　経費 <b>${yen(rec.costs - (monthly ? monthly.total : 0))}</b></p>${m}
+    <p>所持金 <b class="gold">${yen(S.money)}</b></p>
+    <p class="muted">時間になったので、作業中の注文は取り消しになりました。</p>
+    <button class="btn primary" data-act="nextDay">次の日へ</button>
+    <button class="btn" data-act="showLedgerAct">📊 売上表を見る</button>`, false);
+}
+function openLedger(){
+  SFX.open();
+  const L = (SAVE.ledger || []).slice(-30).reverse();
+  const cur = S.dayIncome !== undefined ? `<tr><td>${S.day || 1}日目（営業中）</td><td style="text-align:right">${yen(S.dayIncome || 0)}</td><td style="text-align:right">${yen(S.dayExpense || 0)}</td><td style="text-align:right">${yen((S.dayIncome || 0) - (S.dayExpense || 0))}</td></tr>` : '';
+  openPanel(`<h3>📊 売上表</h3>
+    <p class="muted">日ごとの売上・経費・利益（直近30日）。30日ごとに家賃・光熱費・人件費が引かれます。</p>
+    <table style="width:100%;font-size:13px"><tr><th style="text-align:left">日</th><th>売上</th><th>経費</th><th>利益</th></tr>${cur}
+    ${L.map(r => `<tr><td>${r.day}日目</td><td style="text-align:right">${yen(r.sales)}</td><td style="text-align:right">${yen(r.costs)}</td><td style="text-align:right" class="${r.profit >= 0 ? 'ok' : 'ng'}">${yen(r.profit)}</td></tr>`).join('')}</table>
+    <p>所持金 <b class="gold">${yen(S.money)}</b></p>
+    <button class="btn" data-act="close">閉じる</button>`);
+}
+// 店長の経営メニュー（昇進後の机）
+function openMgmt(){
+  SFX.open();
+  openPanel(`<h3>経営メニュー（店長）</h3>
+    <p>所持金 <b class="gold">${yen(S.money)}</b>　雇用中：${Object.keys(SALARY).map(k => STAFF_NAME[k] + staffOf(k) + '人').join('／')}（各上限3人）</p>` +
+    Object.keys(SALARY).map(k => `<button class="btn" data-act="hire" data-arg="${k}">👤 ${STAFF_NAME[k]}を雇う（月給 ${yen(SALARY[k])}）<br><span class="muted">${STAFF_DESC[k]}</span></button>`).join('') +
+    `<button class="btn" data-act="showLedgerAct">📊 売上表を見る</button>
+     <button class="btn" data-act="close">閉じる</button>`);
+}
+// 売上がしきい値を超えた月末に、オーナーが来て店長交代
+const BGM_NOTES = [523,587,659,523,659,784,659,0, 587,659,698,587,523,494,523,0];
+let bgmTimer = null;
+function startBgm(){
+  stopBgm(); ensureAudio();
+  let i = 0;
+  bgmTimer = setInterval(() => {
+    const f = BGM_NOTES[i++ % BGM_NOTES.length];
+    if(f) tone({f, dur:0.22, type:'triangle', vol:0.12});
+    if(i % 4 === 0) noise({dur:0.05, vol:0.03});
+  }, 260);
+}
+function stopBgm(){ if(bgmTimer){ clearInterval(bgmTimer); bgmTimer = null; } }
+function ownerFires(){
+  startBgm(); SFX.open();
+  openPanel(`<h3>📢 オーナー来店</h3>
+    <p>（とんとこ…と陽気な音楽が流れる）</p>
+    <p>オーナー「おい、店長！ 君、最近ろくに働いてないそうだな。解雇だ！」</p>
+    <button class="btn primary" data-act="ownerNext">……</button>`, false);
+}
+function autoServe(c){
+  if(c.kind === 'buy'){
+    const pid = c.item.part.id;
+    if(stockOf(pid) > 0){
+      stockAdd(pid, -1); S.money += c.item.part.price;
+      S.dayIncome = (S.dayIncome || 0) + c.item.part.price; S.dayExpense = (S.dayExpense || 0) + Math.round(c.item.part.price * 0.75);
+      say(`レジ係が${c.item.part.name}を販売した。`);
+    }
+  } else {
+    const rp = c.repair; rp.dropDay = S.day || 1; rp.deadline = rp.dropDay + rp.wantDays + (staffOf('repair') > 0 ? 1 : 0);
+    REPAIR_Q.push(rp); say('レジ係が修理を預かった。');
+  }
+  c.state = 'leave'; if(REGC === c) REGC = null;
+}
+document.getElementById('ledgerBtn').addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); if(!uiOpen && gameStarted) openLedger(); });
+
 // ===== 在庫・お客さん・修理・出口 =====
 const STOCK = {};
 const stockOf = id => (id in STOCK) ? STOCK[id] : 3;
@@ -1526,6 +1717,7 @@ function updateCustomers(dt){
     } else if(c.state === 'wait'){
       c.wait -= dt;
       c.waited = (c.waited || 0) + dt;
+      if(staffOf('reg') > 0 && c.waited >= 8){ autoServe(c); }
       if(c.waited >= 20){
         c.bellT = (c.bellT ?? 0) - dt;
         if(c.bellT <= 0){ SFX.bell(); c.rings = (c.rings || 0) + 1; c.bellT = 12; say('チリンチリン！ レジでお客さんがベルを鳴らしている。'); }
@@ -1595,7 +1787,15 @@ function reviewFor(c){
 
 // ===== ログイン・クラウド保存（Firebase Auth / Firestore） =====
 // 下の FIREBASE_CONFIG に、Firebaseコンソールで作ったウェブアプリの設定を貼り付けてください。
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDq2jCM4kwhG946gmPf36d2tTrWaEc2GV4",
+  authDomain: "pctukuru-5d541.firebaseapp.com",
+  projectId: "pctukuru-5d541",
+  storageBucket: "pctukuru-5d541.firebasestorage.app",
+  messagingSenderId: "101704069062",
+  appId: "1:101704069062:web:da1803e5d667ee6c26ccc7",
+  measurementId: "G-6HXL9B3PTG"
+};
 // 例: { apiKey:'...', authDomain:'your-project.firebaseapp.com', projectId:'your-project', appId:'...' }
 let fbAuth = null, fbDb = null, fbUser = null;
 function setAuthStatus(t){ const el = document.getElementById('authStatus'); if(el) el.textContent = t; }
@@ -1626,6 +1826,7 @@ function saveCloud(){
   if(!fbUser || !fbDb) return;
   fbDb.collection('saves').doc(fbUser.uid).set({
     money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach,
+    ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, staff: SAVE.staff || {reg:0,restock:0,repair:0},
     updated: firebase.firestore.FieldValue.serverTimestamp()
   }, {merge:true}).catch(() => setAuthStatus('クラウド保存に失敗しました（通信を確認）'));
 }
@@ -1635,7 +1836,7 @@ async function loadCloud(){
     const d = await ref.get();
     if(d.exists){
       const j = d.data();
-      SAVE = Object.assign(SAVE, {money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : []});
+      SAVE = Object.assign(SAVE, {money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, staff:j.staff || {reg:0,restock:0,repair:0}});
       writeSave();
     } else saveCloud();
     refreshContinue();
@@ -1679,7 +1880,7 @@ initAuth();
 
 // ===== セーブ・実績・次の任務 =====
 const SAVE_KEY = 'pcws-save-v1';
-let SAVE = {money:0, rep:0, done:0, ach:[]};
+let SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, staff:{reg:0,restock:0,repair:0}};
 try{ const j = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if(j) SAVE = Object.assign(SAVE, j); }catch(e){}
 function writeSave(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); }catch(e){} }
 function persist(){ SAVE.money = S.money; SAVE.rep = S.rep; SAVE.done = S.done || 0; SAVE.day = S.day || 1; writeSave(); saveCloud(); }
@@ -1717,7 +1918,8 @@ function startGame(withTut, cont){
   document.getElementById('start').style.display = 'none';
   if(cont){ S = Object.assign(newState(), {money:SAVE.money, rep:SAVE.rep, done:SAVE.done, day:SAVE.day || 1}); tutIdx = -1; }
   else tutIdx = withTut ? 0 : -1;
-  openMissionChoice();
+  if(cont){ gameStarted = true; openMissionChoice(); }
+  else { introIdx = 0; showIntro(); }
   if(withTut) showTut();
 }
 document.getElementById('tutYes').addEventListener('click', () => startGame(true));
@@ -1829,9 +2031,13 @@ let tutShown = -2;
 function loop(t){
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
   if(!uiOpen) move(dt);
-  updateCustomers(dt);
+  if(gameStarted){
+    updateCustomers(dt);
+    restockT += dt; if(restockT >= restockPeriod()){ restockT = 0; restockAll(); }
+    dayClock += dt; if(dayClock >= DAY_SEC){ dayClock = 0; if(S.phase !== 'end') endOfDay(); }
+  }
   updateHands(dt);
-  restockT += dt; if(restockT >= 30){ restockT = 0; restockAll(); }
+  updateClock();
   camera.rotation.set(pitch, yaw, 0, 'YXZ');
 
   updateTut();
