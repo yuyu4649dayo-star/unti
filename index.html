@@ -459,11 +459,100 @@ const PARTS = {
     {id:'g54', name:'RX 9070 XT', price:100000, perf:85, len:268, tdp:304},
   ],
   psu: [
-    {id:'p1', name:'500W 80+ Bronze', watt:500, price:6000},
-    {id:'p2', name:'650W 80+ Gold', watt:650, price:10000},
-    {id:'p3', name:'850W 80+ Gold', watt:850, price:15000},
-    {id:'p4', name:'1000W 80+ Platinum', watt:1000, price:25000},
-    {id:'p5', name:'750W 80+ Bronze', watt:750, price:9000},
+    {id:'p1', name:'500W 80+ Bronze', watt:500, price:6000, eff:'Bronze'},
+    {id:'p2', name:'650W 80+ Gold', watt:650, price:10000, eff:'Gold'},
+    {id:'p3', name:'850W 80+ Gold', watt:850, price:15000, eff:'Gold'},
+    {id:'p4', name:'1000W 80+ Platinum', watt:1000, price:25000, eff:'Platinum'},
+    {id:'p5', name:'750W 80+ Bronze', watt:750, price:9000, eff:'Bronze'},
+    {id:'p6', name:'400W 80+ White', watt:400, price:4000, eff:'White'},
+    {id:'p7', name:'400W 80+ Bronze', watt:400, price:4500, eff:'Bronze'},
+    {id:'p8', name:'400W 80+ Gold', watt:400, price:5500, eff:'Gold'},
+    {id:'p9', name:'400W 80+ Platinum', watt:400, price:7000, eff:'Platinum'},
+    {id:'p10', name:'400W 80+ Titanium', watt:400, price:9500, eff:'Titanium'},
+    {id:'p11', name:'450W 80+ White', watt:450, price:4500, eff:'White'},
+    {id:'p12', name:'450W 80+ Bronze', watt:450, price:5000, eff:'Bronze'},
+    {id:'p13', name:'450W 80+ Gold', watt:450, price:6000, eff:'Gold'},
+    {id:'p14', name:'450W 80+ Platinum', watt:450, price:8000, eff:'Platinum'},
+    {id:'p15', name:'450W 80+ Titanium', watt:450, price:11000, eff:'Titanium'},
+    {id:'p16', name:'500W 80+ White', watt:500, price:5000, eff:'White'},
+    {id:'p17', name:'500W 80+ Gold', watt:500, price:7000, eff:'Gold'},
+    {id:'p18', name:'500W 80+ Platinum', watt:500, price:9000, eff:'Platinum'},
+    {id:'p19', name:'500W 80+ Titanium', watt:500, price:12000, eff:'Titanium'},
+    {id:'p20', name:'550W 80+ White', watt:550, price:5500, eff:'White'},
+    {id:'p21', name:'550W 80+ Bronze', watt:550, price:6000, eff:'Bronze'},
+    {id:'p22', name:'550W 80+ Gold', watt:550, price:7500, eff:'Gold'},
+    {id:'p23', name:'550W 80+ Platinum', watt:550, price:9500, eff:'Platinum'},
+    {id:'p24', name:'550W 80+ Titanium', watt:550, price:13500, eff:'Titanium'},
+    {id:'p25', name:'600W 80+ White', watt:600, price:6000, eff:'White'},
+    {id:'p26', name:'600W 80+ Bronze', watt:600, price:6500, eff:'Bronze'},
+    {id:'p27', name:'600W 80+ Gold', watt:600, price:8000, eff:'Gold'},
+    {id:'p28', name:'600W 80+ Platinum', watt:600, price:10500, eff:'Platinum'},
+    {id:'p29', name:'600W 80+ Titanium', watt:600, price:14500, eff:'Titanium'},
+    {id:'p30', name:'650W 80+ White', watt:650, price:6500, eff:'White'},
+    {id:'p31', name:'650W 80+ Bronze', watt:650, price:7000, eff:'Bronze'},
+    {id:'p32', name:'650W 80+ Platinum', watt:650, price:11500, eff:'Platinum'},
+    {id:'p33', name:'650W 80+ Platinum（フルモジュラー）', watt:650, price:13000, eff:'Platinum'},
+    {id:'p34', name:'650W 80+ Titanium', watt:650, price:15500, eff:'Titanium'},
+    {id:'p35', name:'650W 80+ Titanium（フルモジュラー）', watt:650, price:17000, eff:'Titanium'},
+    {id:'p36', name:'700W 80+ White', watt:700, price:7000, eff:'White'},
+    {id:'p37', name:'700W 80+ Bronze', watt:700, price:7500, eff:'Bronze'},
+    {id:'p38', name:'700W 80+ Gold', watt:700, price:9500, eff:'Gold'},
+    {id:'p39', name:'700W 80+ Gold（フルモジュラー）', watt:700, price:11000, eff:'Gold'},
+    {id:'p40', name:'700W 80+ Platinum', watt:700, price:12500, eff:'Platinum'},
+    {id:'p41', name:'700W 80+ Platinum（フルモジュラー）', watt:700, price:14000, eff:'Platinum'},
+    {id:'p42', name:'700W 80+ Titanium', watt:700, price:17000, eff:'Titanium'},
+    {id:'p43', name:'700W 80+ Titanium（フルモジュラー）', watt:700, price:18500, eff:'Titanium'},
+    {id:'p44', name:'750W 80+ White', watt:750, price:7500, eff:'White'},
+    {id:'p45', name:'750W 80+ Gold', watt:750, price:10500, eff:'Gold'},
+    {id:'p46', name:'750W 80+ Gold（フルモジュラー）', watt:750, price:12000, eff:'Gold'},
+    {id:'p47', name:'750W 80+ Platinum', watt:750, price:13000, eff:'Platinum'},
+    {id:'p48', name:'750W 80+ Platinum（フルモジュラー）', watt:750, price:14500, eff:'Platinum'},
+    {id:'p49', name:'750W 80+ Titanium', watt:750, price:18000, eff:'Titanium'},
+    {id:'p50', name:'750W 80+ Titanium（フルモジュラー）', watt:750, price:19500, eff:'Titanium'},
+    {id:'p51', name:'800W 80+ White', watt:800, price:8000, eff:'White'},
+    {id:'p52', name:'800W 80+ Bronze', watt:800, price:9000, eff:'Bronze'},
+    {id:'p53', name:'800W 80+ Gold', watt:800, price:11000, eff:'Gold'},
+    {id:'p54', name:'800W 80+ Gold（フルモジュラー）', watt:800, price:12500, eff:'Gold'},
+    {id:'p55', name:'800W 80+ Platinum', watt:800, price:14000, eff:'Platinum'},
+    {id:'p56', name:'800W 80+ Platinum（フルモジュラー）', watt:800, price:15500, eff:'Platinum'},
+    {id:'p57', name:'800W 80+ Titanium', watt:800, price:19500, eff:'Titanium'},
+    {id:'p58', name:'800W 80+ Titanium（フルモジュラー）', watt:800, price:21000, eff:'Titanium'},
+    {id:'p59', name:'850W 80+ White', watt:850, price:8500, eff:'White'},
+    {id:'p60', name:'850W 80+ Bronze', watt:850, price:9500, eff:'Bronze'},
+    {id:'p61', name:'850W 80+ Platinum', watt:850, price:15000, eff:'Platinum'},
+    {id:'p62', name:'850W 80+ Platinum（フルモジュラー）', watt:850, price:16500, eff:'Platinum'},
+    {id:'p63', name:'850W 80+ Titanium', watt:850, price:20500, eff:'Titanium'},
+    {id:'p64', name:'850W 80+ Titanium（フルモジュラー）', watt:850, price:22000, eff:'Titanium'},
+    {id:'p65', name:'1000W 80+ White', watt:1000, price:10000, eff:'White'},
+    {id:'p66', name:'1000W 80+ Bronze', watt:1000, price:11000, eff:'Bronze'},
+    {id:'p67', name:'1000W 80+ Gold', watt:1000, price:14000, eff:'Gold'},
+    {id:'p68', name:'1000W 80+ Gold（フルモジュラー）', watt:1000, price:15500, eff:'Gold'},
+    {id:'p69', name:'1000W 80+ Titanium', watt:1000, price:24000, eff:'Titanium'},
+    {id:'p70', name:'1000W 80+ Titanium（フルモジュラー）', watt:1000, price:25500, eff:'Titanium'},
+    {id:'p71', name:'1200W 80+ White', watt:1200, price:12000, eff:'White'},
+    {id:'p72', name:'1200W 80+ Bronze', watt:1200, price:13000, eff:'Bronze'},
+    {id:'p73', name:'1200W 80+ Gold', watt:1200, price:16500, eff:'Gold'},
+    {id:'p74', name:'1200W 80+ Gold（フルモジュラー）', watt:1200, price:18000, eff:'Gold'},
+    {id:'p75', name:'1200W 80+ Platinum', watt:1200, price:21000, eff:'Platinum'},
+    {id:'p76', name:'1200W 80+ Platinum（フルモジュラー）', watt:1200, price:22500, eff:'Platinum'},
+    {id:'p77', name:'1200W 80+ Titanium', watt:1200, price:29000, eff:'Titanium'},
+    {id:'p78', name:'1200W 80+ Titanium（フルモジュラー）', watt:1200, price:30500, eff:'Titanium'},
+    {id:'p79', name:'1300W 80+ White', watt:1300, price:13000, eff:'White'},
+    {id:'p80', name:'1300W 80+ Bronze', watt:1300, price:14500, eff:'Bronze'},
+    {id:'p81', name:'1300W 80+ Gold', watt:1300, price:18000, eff:'Gold'},
+    {id:'p82', name:'1300W 80+ Gold（フルモジュラー）', watt:1300, price:19500, eff:'Gold'},
+    {id:'p83', name:'1300W 80+ Platinum', watt:1300, price:23000, eff:'Platinum'},
+    {id:'p84', name:'1300W 80+ Platinum（フルモジュラー）', watt:1300, price:24500, eff:'Platinum'},
+    {id:'p85', name:'1300W 80+ Titanium', watt:1300, price:31500, eff:'Titanium'},
+    {id:'p86', name:'1300W 80+ Titanium（フルモジュラー）', watt:1300, price:33000, eff:'Titanium'},
+    {id:'p87', name:'1600W 80+ White', watt:1600, price:16000, eff:'White'},
+    {id:'p88', name:'1600W 80+ Bronze', watt:1600, price:17500, eff:'Bronze'},
+    {id:'p89', name:'1600W 80+ Gold', watt:1600, price:22000, eff:'Gold'},
+    {id:'p90', name:'1600W 80+ Gold（フルモジュラー）', watt:1600, price:23500, eff:'Gold'},
+    {id:'p91', name:'1600W 80+ Platinum', watt:1600, price:28000, eff:'Platinum'},
+    {id:'p92', name:'1600W 80+ Platinum（フルモジュラー）', watt:1600, price:29500, eff:'Platinum'},
+    {id:'p93', name:'1600W 80+ Titanium', watt:1600, price:38500, eff:'Titanium'},
+    {id:'p94', name:'1600W 80+ Titanium（フルモジュラー）', watt:1600, price:40000, eff:'Titanium'},
   ],
   case: [
     {id:'k1', name:'ミニケース', ff:['ITX','mATX'], maxGpu:250, price:7000},
@@ -653,7 +742,7 @@ function checks(){
   if(p.mb && p.ram) add(true, p.ram.type === p.mb.ram, `メモリ規格（${p.ram.type} / マザボ ${p.mb.ram}）`);
   if(p.mb && p.case) add(true, p.case.ff.includes(p.mb.ff), `マザボの形状がケースに対応（${p.mb.ff}）`);
   if(p.gpu && p.case) add(true, p.gpu.len <= p.case.maxGpu, `GPUの長さ（${p.gpu.len}mm / 上限 ${p.case.maxGpu}mm）`);
-  if(p.cpu && p.psu){ const gt = p.gpu ? p.gpu.tdp : 0; const need = p.cpu.tdp + gt + 80; add(true, p.psu.watt >= need, `電源容量（${p.psu.watt}W / 必要 ${need}W以上）`); }
+  if(p.cpu && p.psu){ const gt = p.gpu ? p.gpu.tdp : 0; const need = p.cpu.tdp + gt + 80; add(true, p.psu.watt >= need, p.psu.watt >= need ? `電源容量は足りる（${p.psu.watt}W / 必要 ${need}W以上）` : `電源が足りない（${p.psu.watt}W / 必要 ${need}W以上）`); }
   if(p.cpu && !p.gpu) add(true, !!p.cpu.igpu, '映像出力がない（GPUか内蔵GPUのCPUが必要）');
   if(p.cpu && p.cooler) add(true, p.cooler.sockets.includes(p.cpu.socket) && p.cpu.tdp <= p.cooler.maxTdp, `クーラーの対応（熱設計 ${p.cpu.tdp}W / 上限 ${p.cooler.maxTdp}W）`);
   add(false, total() <= o.budget, `予算内（${yen(total())} / ${yen(o.budget)}）`);
@@ -1358,11 +1447,48 @@ function projHtml(){
     <span class="muted">※チップ（品質で0〜5,000円）は含みません。${notes.join('／')}</span>
   </div>`;
 }
+let SHELF_SORT = 'def';
+const SORTS = {def:'おすすめ順', pl:'値段が安い順', ph:'値段が高い順', name:'名前順', perf:'性能が高い順', stock:'在庫が多い順'};
+function sortedParts(k){
+  const arr = PARTS[k].slice();
+  if(SHELF_SORT === 'pl') arr.sort((a,b) => a.price - b.price);
+  else if(SHELF_SORT === 'ph') arr.sort((a,b) => b.price - a.price);
+  else if(SHELF_SORT === 'name') arr.sort((a,b) => a.name.localeCompare(b.name, 'ja'));
+  else if(SHELF_SORT === 'perf') arr.sort((a,b) => (b.perf || 0) - (a.perf || 0));
+  else if(SHELF_SORT === 'stock') arr.sort((a,b) => stockOf(b.id) - stockOf(a.id));
+  return arr;
+}
+// 電源の計算：CPUの熱設計（TDP）＋GPUのTDP＋余裕80W が必要な電源の容量
+function psuNeed(){ const c = get('cpu'); if(!c) return null; const g = get('gpu'); return c.tdp + (g ? g.tdp : 0) + 80; }
+function psuInfoHtml(){
+  const c = get('cpu'), g = get('gpu'), need = psuNeed();
+  if(!c) return `<p class="muted">CPUを選ぶと、必要な電源の容量がここに出ます。</p>`;
+  return `<div style="border:1px solid #2c3558;border-radius:10px;padding:8px 10px;margin:6px 0">必要な電源：<b class="gold">${need}W以上</b><br><span class="muted">CPU ${c.tdp}W ＋ GPU ${g ? g.tdp + 'W' : 'なし（内蔵GPU）'} ＋ 余裕80W</span></div>`;
+}
+function psuJudge(p){
+  const need = psuNeed(); if(need === null) return '';
+  if(p.watt >= need){
+    const extra = p.watt - need;
+    return `　<span class="ok">✅ 足りる（余裕 ${extra}W）</span>` + (extra > 400 ? `<span class="muted">　※容量が大きすぎて割高</span>` : '');
+  }
+  return `　<span class="ng">❌ 足りない（あと ${need - p.watt}W）</span>`;
+}
+function psuHud(){
+  const need = psuNeed(); if(need === null) return '';
+  const p = get('psu');
+  if(!p) return `電源：必要 ${need}W以上`;
+  return p.watt >= need ? `電源 ✅ ${p.watt}W` : `電源 ❌ ${p.watt}W（必要 ${need}W）`;
+}
 function openShelf(k){
   SFX.open();
   const c = CAT.find(x => x.key === k);
-  openPanel(`<h3>${c.label}の棚</h3><p class="muted">一つ選ぶと、作業台に運ぶ用のパーツが準備されます。</p>${projHtml()}<p>選んだパーツの合計：<b class="gold">${yen(total())}</b>　予算：${yen(curO().budget)}</p>` +
-    PARTS[k].map(p => `<button class="btn ${S.cart[k]===p.id?'on':''}" data-act="setPart" data-arg="${k}|${p.id}">${S.cart[k]===p.id?'✅ ':''}${p.name}　<span class="gold">${yen(p.price)}</span>　在庫 ${stockOf(p.id)}</button>`).join('') +
+  const tabs = CAT.map(x => `<button class="btn ${x.key===k?'on':''}" data-act="openShelfAct" data-arg="${x.key}" style="display:inline-block;width:auto;padding:6px 8px;font-size:13px;margin:2px">${x.label}</button>`).join('');
+  const sorts = Object.entries(SORTS).map(([v,l]) => `<button class="btn ${SHELF_SORT===v?'on':''}" data-act="sortShelf" data-arg="${k}|${v}" style="display:inline-block;width:auto;padding:6px 8px;font-size:13px;margin:2px">${l}</button>`).join('');
+  openPanel(`<h3>${c.label}の棚</h3>
+    <div>${tabs}</div>
+    <div style="margin:4px 0">並び順：${sorts}</div>
+    <p class="muted">一つ選ぶと、作業台に運ぶ用のパーツが準備されます。</p>${k === 'psu' ? psuInfoHtml() : ''}${projHtml()}<p>選んだパーツの合計：<b class="gold">${yen(total())}</b>　予算：${yen(curO().budget)}</p>` +
+    sortedParts(k).map(p => `<button class="btn ${S.cart[k]===p.id?'on':''}" data-act="setPart" data-arg="${k}|${p.id}">${S.cart[k]===p.id?'✅ ':''}${p.name}　<span class="gold">${yen(p.price)}</span>　性能 ${p.perf ?? '-'}　在庫 ${stockOf(p.id)}${k === 'psu' ? psuJudge(p) : ''}</button>`).join('') +
     (S.cart[k] && !(S.repair && S.cart[k] === S.repair.brokenId) ? `<button class="btn" data-act="unsetPart" data-arg="${k}">✖ 選んだ${c.label}を棚に戻す（取り消し）</button>` : ''));
 }
 
@@ -1490,6 +1616,8 @@ const ACT = {
     closePanel();
     say(`${LABEL[k]}：${get(k).name} を選んだ。`);
   },
+  openShelfAct(k){ SFX.click(); openShelf(k); },
+  sortShelf(arg){ const [k, v] = arg.split('|'); SHELF_SORT = v; SFX.click(); openShelf(k); },
   unsetPart(k){
     const old = S.cart[k];
     if(!old) return;
@@ -1531,7 +1659,8 @@ const ACT = {
   cancelExit(){ SFX.click(); closePanel(); },
   nextDay(){
     SFX.click();
-    if(S.phase !== 'result' && S.phase !== 'end') returnCart();
+    const carry = ['shop','build','pack','test'].includes(S.phase);
+    if(!carry && S.phase !== 'result' && S.phase !== 'end') returnCart();
     persist();
     CUST.forEach(c => scene.remove(c.mesh)); CUST.length = 0; REGC = null; custTimer = 12;
     const nd = (S.day || 1) + 1;
@@ -1539,12 +1668,19 @@ const ACT = {
       if(nd > REPAIR_Q[i].deadline + 1){ REPAIR_Q.splice(i,1); S.rep = Math.max(0, S.rep - 1); }
     }
     dayEnding = false; lastDayRec = null;
+    if(carry){
+      S.day = nd; S.dayIncome = 0; S.dayExpense = 0;
+      closePanel(); persist();
+      if(Math.random() < 0.25) startMgrHelp();
+      say(`${nd}日目。昨日の作業の続きから始めよう。`);
+      return;
+    }
     S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:nd});
     resetWorld(); persist(); openMissionChoice();
     if(Math.random() < 0.25) startMgrHelp();
     say(`${nd}日目。期限の近い修理から確認しよう。`);
   },
-  closeShop(){ SFX.click(); if(S.phase !== 'result') returnCart(); endOfDay(); },
+  closeShop(){ SFX.click(); endOfDay(); },
   hire(arg){
     if(!SAVE.isManager) return;
     SAVE.staff = SAVE.staff || {reg:0,restock:0,repair:0};
@@ -1754,7 +1890,7 @@ function openDaySummary(rec, monthly){
     <p>今日の売上 <b>${yen(rec.sales)}</b>　経費 <b>${yen(rec.costs - (monthly ? monthly.total : 0))}</b></p>${m}
     <p>所持金 <b class="gold">${yen(S.money)}</b></p>
     <p>店の利益（累計）<b class="ok">${yen(SAVE.profit || 0)}</b>　※所持金とは別に、毎日の利益を積み上げます</p>
-    <p class="muted">営業を終えました。作業中の注文があれば取り消しになります。</p>
+    ${['shop','build','pack','test'].includes(S.phase) ? '<p class="muted">作業中の注文は明日に持ち越します（この画面を閉じると消えます）。</p>' : ''}
     <button class="btn primary" data-act="nextDay">次の日へ</button>
     <button class="btn" data-act="showLedgerAct" data-arg="summary">📊 売上表を見る</button>`, false);
 }
@@ -1835,16 +1971,49 @@ const REPAIR_TPL = [
 ];
 const SYMPTOM = {cpu:'勝手に再起動を繰り返す', mb:'画面が映らない', ram:'ビープ音が鳴る', gpu:'映像が乱れる', psu:'電源がすぐ落ちる', cooler:'異音がして高温になる', storage:'OSが起動しない'};
 const NAMES = ['鈴木','佐藤','高橋','田中','伊藤','渡辺','中村','小林','加藤','吉田'];
+function compatOK(m){
+  const cpu = m.cpu, mb = m.mb, cs = m.case, gpu = m.gpu, psu = m.psu, cooler = m.cooler, ram = m.ram;
+  if(cpu && mb && cpu.socket !== mb.socket) return false;
+  if(mb && ram && ram.type !== mb.ram) return false;
+  if(mb && cs && !cs.ff.includes(mb.ff)) return false;
+  if(gpu && cs && gpu.len > cs.maxGpu) return false;
+  if(cpu && psu && psu.watt < cpu.tdp + (gpu ? gpu.tdp : 0) + 80) return false;
+  if(cpu && !gpu && !cpu.igpu) return false;
+  if(cpu && cooler && !(cooler.sockets.includes(cpu.socket) && cpu.tdp <= cooler.maxTdp)) return false;
+  return true;
+}
+// 修理の報酬：一番安く合う交換部品＋一番安い箱・送料でも、期限内なら必ず黒字になる額にする（合わない場合は null）
+function repairBudget(key, cart, fee){
+  const m = {};
+  CAT.forEach(c => { const id = cart[c.key]; m[c.key] = id ? PARTS[c.key].find(p => p.id === id) : undefined; });
+  const brokenId = cart[key];
+  let minPart = Infinity;
+  PARTS[key].forEach(cand => {
+    if(cand.id === brokenId) return;
+    m[key] = cand;
+    if(compatOK(m) && cand.price < minPart) minPart = cand.price;
+  });
+  if(!isFinite(minPart)) return null;
+  const minBox = Math.min(...Object.values(BOX).map(b => b.cost));
+  const minShip = Math.min(...Object.values(SHIP).map(x => x.cost));
+  const need = minPart + minBox + minShip + 2000;
+  return Math.max(fee + 4000, Math.ceil(need / 1.3 / 100) * 100);
+}
 function makeRepairJob(){
-  const tpl = REPAIR_TPL[Math.floor(Math.random()*REPAIR_TPL.length)];
-  const cart = Object.assign({}, tpl);
-  const keys = Object.keys(cart).filter(k => k !== 'case' && SYMPTOM[k]);
-  const key = keys[Math.floor(Math.random()*keys.length)];
-  const fee = {cpu:9000, mb:8000, ram:6000, gpu:10000, psu:6000, cooler:5000, storage:6000}[key] || 7000;
+  let tpl, cart, key, fee, budget;
+  for(let tries = 0; tries < 50; tries++){
+    tpl = REPAIR_TPL[Math.floor(Math.random()*REPAIR_TPL.length)];
+    cart = Object.assign({}, tpl);
+    const keys = Object.keys(cart).filter(k => k !== 'case' && SYMPTOM[k]);
+    key = keys[Math.floor(Math.random()*keys.length)];
+    fee = {cpu:9000, mb:8000, ram:6000, gpu:10000, psu:6000, cooler:5000, storage:6000}[key] || 7000;
+    budget = repairBudget(key, cart, fee);
+    if(budget) break;
+  }
   const wantDays = 1 + Math.floor(Math.random()*2);
   return {client: NAMES[Math.floor(Math.random()*NAMES.length)] + 'さん', job:'修理依頼',
     letter:`${LABEL[key]}のあたりが怪しいです。電源を入れると${SYMPTOM[key]}。${wantDays}日以内に直して返してください。`,
-    budget: fee + 4000, minPerf: 0, wantDays, repair:{key, brokenId: tpl[key], cart, fee}};
+    budget: budget || fee + 4000, minPerf: 0, wantDays, repair:{key, brokenId: tpl[key], cart, fee}};
 }
 function makeCustomer(){
   const g = new THREE.Group();
@@ -1937,7 +2106,7 @@ function openExit(){
   const working = !['order','end'].includes(S.phase) && S.cart && Object.keys(S.cart).length > 0;
   openPanel(`<h3>出口</h3><p>今日の営業を終えて帰りますか？</p>
     <p>所持金 <b class="gold">${yen(S.money)}</b>　累計納品 ${S.done || 0} 件</p>
-    ${working ? '<p class="muted">作りかけの注文は取り消しになり、棚の部品は在庫に戻ります。</p>' : ''}
+    ${working ? '<p class="muted">作りかけの注文は明日に持ち越します。</p>' : ''}
     <button class="btn primary" data-act="closeShop">閉店して、次の営業日へ</button>
     <button class="btn" data-act="cancelExit">まだ残る</button>`);
 }
@@ -2257,6 +2426,13 @@ function startMgrHelp(){
   mgrHelp = {t: 0, phase: 'in'};
   say('今日は店長が事務室から顔を出した…');
 }
+// 店長の仕事：全部品を在庫いっぱい（5個）に補充し、レジで待っているお客さんをすべて会計・受付まで済ませる
+function mgrWork(){
+  Object.values(PARTS).flat().forEach(p => stockAdd(p.id, 5 - stockOf(p.id)));
+  const waiting = CUST.filter(c => c.state === 'wait');
+  waiting.forEach(c => { if(REGC === c) REGC = null; autoServe(c); });
+  say(`店長が働いた：在庫を全部品5個まで補充${waiting.length ? `、待っていたお客さん${waiting.length}人を対応` : ''}。`);
+}
 function updateMgrHelp(dt){
   if(!mgrHelp) return;
   if(!MGR_MESH_REF){ mgrHelp = null; return; }
@@ -2270,11 +2446,11 @@ function updateMgrHelp(dt){
   };
   mgrHelp.t += dt;
   if(mgrHelp.phase === 'in'){
-    if(goTo(work, 2.2)){ mgrHelp.phase = 'work'; mgrHelp.t = 0; restockAll(); SFX.ding(); say('店長が在庫を補充してくれた（全部品 +1）。'); }
+    if(goTo(work, 3.5)){ mgrHelp.phase = 'work'; mgrHelp.t = 0; mgrWork(); SFX.ding(); }
   } else if(mgrHelp.phase === 'work'){
-    if(mgrHelp.t > 1.5) mgrHelp.phase = 'out';
+    if(mgrHelp.t > 6) mgrHelp.phase = 'out';
   } else if(mgrHelp.phase === 'out'){
-    if(goTo(home, 2.2)) mgrHelp = null;
+    if(goTo(home, 3.5)) mgrHelp = null;
   }
 }
 
@@ -2435,7 +2611,7 @@ function loop(t){
 
   document.getElementById('obj').textContent = '目標：' + objective();
   document.getElementById('stat').textContent = `所持金 ${yen(S.money)}　店の利益 ${yen(SAVE.profit || 0)}　評判 ${S.rep}　${S.day || 1}日目　累計 ${S.done || 0}件　損傷 ${S.damage}`;
-  { const p = projection(); document.getElementById('total').textContent = `選んだパーツ合計 ${yen(total())} ／ 予算 ${yen(curO().budget)}　｜　見込み：${p.base >= 0 ? '黒字 +' : '赤字 −'}${yen(Math.abs(p.base))}`; }
+  { const p = projection(); document.getElementById('total').textContent = `選んだパーツ合計 ${yen(total())} ／ 予算 ${yen(curO().budget)}　｜　見込み：${p.base >= 0 ? '黒字 +' : '赤字 −'}${yen(Math.abs(p.base))}　｜　${psuHud()}`; }
 
   updateTarget();
   const near = uiOpen ? null : nearest();
