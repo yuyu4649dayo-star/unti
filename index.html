@@ -23,6 +23,7 @@ canvas{display:block;touch-action:none}
 #mute{right:12px}
 #ledgerBtn{right:156px}
 #setBtn{right:204px}
+#pauseBtn{right:252px}
 #clock{position:fixed;top:10px;left:10px;z-index:9;background:#000a;border:1px solid #ffffff44;border-radius:10px;padding:6px 10px;font-size:14px;color:#fff;pointer-events:none}
 #achBtn{right:108px}
 #panel{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:5}
@@ -59,6 +60,7 @@ canvas{display:block;touch-action:none}
 <div id="achBtn" class="iconbtn">🏆</div>
 <div id="ledgerBtn" class="iconbtn">📊</div>
 <div id="setBtn" class="iconbtn">⚙</div>
+<div id="pauseBtn" class="iconbtn">⏸</div>
 <div id="mute" class="iconbtn">🔊</div>
 <div id="clock" style="display:none"></div>
 <div id="tut"><div class="txt"><span class="tag"></span><span class="body"></span></div><button id="tutSkip">スキップ</button></div>
@@ -168,6 +170,8 @@ function noise({dur=0.1, vol=0.2, delay=0, hp=null, bp=null}){
 }
 const SFX = {
   bell(){ tone({f:1568,dur:0.7,type:'triangle',vol:0.28}); tone({f:2093,dur:0.7,type:'triangle',vol:0.22,delay:0.08}); },
+  coin(){ tone({f:2400,dur:0.1,type:'square',vol:0.07}); tone({f:3200,dur:0.22,type:'triangle',vol:0.16,delay:0.05}); },
+  chirin(){ SFX.coin(); setTimeout(() => SFX.coin(), 260); },
   click(){ tone({f:900, dur:0.04, type:'square', vol:0.06}); },
   open(){ tone({f:520, f2:780, dur:0.1, type:'triangle', vol:0.12}); },
   pickup(){ tone({f:330, f2:520, dur:0.12, type:'triangle', vol:0.15}); noise({dur:0.05, vol:0.06, hp:1200}); },
@@ -406,6 +410,53 @@ const PARTS = {
     {id:'g5', name:'GTX 1660 Super', price:24000, perf:35, len:220, tdp:125},
     {id:'g6', name:'RX 7800 XT', price:72000, perf:75, len:280, tdp:263},
     {id:'g7', name:'RTX 4090', price:260000, perf:100, len:336, tdp:450},
+    {id:'g8', name:'RTX 3050 6GB', price:35000, perf:22, len:170, tdp:70},
+    {id:'g9', name:'RTX 3050 8GB', price:40000, perf:25, len:170, tdp:75},
+    {id:'g10', name:'RTX 3060', price:45000, perf:36, len:200, tdp:170},
+    {id:'g11', name:'RTX 3060 Ti', price:60000, perf:50, len:240, tdp:200},
+    {id:'g12', name:'RTX 3070', price:70000, perf:56, len:240, tdp:220},
+    {id:'g13', name:'RTX 3070 Ti', price:80000, perf:62, len:285, tdp:290},
+    {id:'g14', name:'RTX 3080', price:100000, perf:70, len:285, tdp:320},
+    {id:'g15', name:'RTX 3080 Ti', price:120000, perf:75, len:285, tdp:350},
+    {id:'g16', name:'RTX 3090', price:150000, perf:78, len:313, tdp:350},
+    {id:'g17', name:'RTX 3090 Ti', price:200000, perf:82, len:310, tdp:450},
+    {id:'g18', name:'RTX 4060 Ti', price:65000, perf:63, len:240, tdp:160},
+    {id:'g19', name:'RTX 4070', price:80000, perf:72, len:240, tdp:200},
+    {id:'g20', name:'RTX 4070 Ti', price:120000, perf:84, len:285, tdp:285},
+    {id:'g21', name:'RTX 4070 Ti SUPER', price:130000, perf:88, len:300, tdp:285},
+    {id:'g22', name:'RTX 4080', price:160000, perf:92, len:310, tdp:320},
+    {id:'g23', name:'RTX 5050', price:40000, perf:50, len:200, tdp:130},
+    {id:'g24', name:'RTX 5060', price:50000, perf:60, len:200, tdp:145},
+    {id:'g25', name:'RTX 5060 Ti', price:60000, perf:66, len:230, tdp:180},
+    {id:'g26', name:'RTX 5070', price:90000, perf:76, len:250, tdp:250},
+    {id:'g27', name:'RTX 5070 Ti', price:120000, perf:85, len:300, tdp:300},
+    {id:'g28', name:'RTX 5080', price:170000, perf:93, len:300, tdp:360},
+    {id:'g29', name:'RTX 5090', price:350000, perf:105, len:340, tdp:575},
+    {id:'g30', name:'RX 6400', price:20000, perf:20, len:170, tdp:53},
+    {id:'g31', name:'RX 6500 XT', price:25000, perf:28, len:180, tdp:107},
+    {id:'g32', name:'RX 6600', price:35000, perf:40, len:220, tdp:132},
+    {id:'g33', name:'RX 6600 XT', price:42000, perf:46, len:240, tdp:160},
+    {id:'g34', name:'RX 6650 XT', price:45000, perf:50, len:240, tdp:180},
+    {id:'g35', name:'RX 6700', price:55000, perf:56, len:260, tdp:175},
+    {id:'g36', name:'RX 6700 XT', price:58000, perf:60, len:267, tdp:230},
+    {id:'g37', name:'RX 6750 XT', price:65000, perf:63, len:267, tdp:250},
+    {id:'g38', name:'RX 6800', price:70000, perf:72, len:267, tdp:250},
+    {id:'g39', name:'RX 6800 XT', price:85000, perf:78, len:267, tdp:300},
+    {id:'g40', name:'RX 6900 XT', price:100000, perf:82, len:287, tdp:300},
+    {id:'g41', name:'RX 6950 XT', price:115000, perf:85, len:287, tdp:335},
+    {id:'g42', name:'RX 7500', price:32000, perf:35, len:180, tdp:100},
+    {id:'g43', name:'RX 7600 XT', price:50000, perf:52, len:240, tdp:190},
+    {id:'g44', name:'RX 7700 XT', price:70000, perf:68, len:270, tdp:245},
+    {id:'g45', name:'RX 7900 GRE', price:85000, perf:76, len:267, tdp:260},
+    {id:'g46', name:'RX 7900 XT', price:110000, perf:82, len:276, tdp:315},
+    {id:'g47', name:'RX 7900 XTX', price:140000, perf:88, len:287, tdp:355},
+    {id:'g48', name:'RX 9050', price:34000, perf:45, len:200, tdp:130},
+    {id:'g49', name:'RX 9060', price:42000, perf:48, len:200, tdp:150},
+    {id:'g50', name:'RX 9060 XT 8GB', price:48000, perf:55, len:230, tdp:150},
+    {id:'g51', name:'RX 9060 XT 16GB', price:56000, perf:60, len:230, tdp:160},
+    {id:'g52', name:'RX 9070 GRE', price:75000, perf:70, len:267, tdp:220},
+    {id:'g53', name:'RX 9070', price:90000, perf:80, len:268, tdp:220},
+    {id:'g54', name:'RX 9070 XT', price:100000, perf:85, len:268, tdp:304},
   ],
   psu: [
     {id:'p1', name:'500W 80+ Bronze', watt:500, price:6000},
@@ -673,6 +724,18 @@ function partModel(k){
       for(let i=0;i<4;i++) B(0.052,0.02,0.004,0x9aa0a8,0.1,0.02,0.08+i*0.012);
       for(let i=0;i<6;i++) C(0.008,0.012,i%2?0xc9a227:0x1a1a1a,0.15+(i%3)*0.02,0.012,-0.12-Math.floor(i/3)*0.02); // コンデンサ
       B(0.03,0.05,0.14,0xc0c6ce,-0.2,0.035,-0.02);            // I/Oシールド
+      // 見た目の追加：電源コネクタ・配線・背面の色付き端子・CPUソケットのレバー
+      B(0.035,0.03,0.11,0x1b1b1b,0.18,0.02,-0.02);            // 24ピン電源コネクタ
+      for(let i=0;i<12;i++) B(0.004,0.012,0.004,0xd8c28a,0.165+(i%2)*0.008,0.025,-0.07+Math.floor(i/2)*0.012); // 端子
+      B(0.06,0.024,0.03,0x1b1b1b,-0.05,0.02,-0.2);            // 8ピンCPU電源
+      B(0.3,0.0008,0.003,0xb87333,0,0.0151,0.05);             // 銅色の配線
+      B(0.003,0.0008,0.2,0xb87333,0.05,0.0151,-0.05);
+      B(0.12,0.006,0.12,0x9aa0a8,-0.05,0.016,-0.04);          // CPUソケットのフレーム
+      B(0.02,0.014,0.02,0x2b6cb0,-0.2,0.03,-0.08);            // 背面の色付き端子
+      B(0.02,0.014,0.02,0xc0392b,-0.2,0.03,-0.05);
+      B(0.02,0.014,0.02,0x27ae60,-0.2,0.03,-0.02);
+      B(0.02,0.014,0.02,0x2b6cb0,-0.2,0.03,0.01);
+      B(0.08,0.004,0.02,0x111111,-0.14,0.024,0.15);           // ブランドのプレート
       if(/RGB/.test(nm)) LED(0.3,0.002,0.004,0x3dd6ff,0,0.0185,0.17);
       break;
     }
@@ -1081,18 +1144,63 @@ function installHeld(){
     return say(`❌ 今は${st.label}の番。違う部品だったので元の場所に戻した。`);
   }
   camera.remove(held.mesh);
-  caseGroup.add(installMesh(st.key));
+  { const pm = installMesh(st.key); caseGroup.add(pm); addScrewHeads(pm, NEED[st.key] || 3); }
   held = null;
   SFX.place();
   S.screwing = true; S.screws = 0; S.screwNeed = NEED[st.key] || 3;
   say(`${st.label}を差し込んだ。ネジを${S.screwNeed}本締めよう（${K_ACT}を連打）。`);
 }
+let CUR_SCREWS = [];
+const ALL_SCREWS = [];
+const SPARKS = [];
+const SPARK_GEO = new THREE.SphereGeometry(0.006, 6, 6);
+function addScrewHeads(part, n){
+  const sz = new THREE.Box3().setFromObject(part).getSize(new THREE.Vector3());
+  const spots = [[-0.36,-0.36],[0.36,-0.36],[0.36,0.36],[-0.36,0.36],[0,0.4],[0,-0.4],[0.4,0],[-0.4,0]];
+  CUR_SCREWS = [];
+  for(let i = 0; i < n; i++){
+    const [fx, fz] = spots[i % spots.length];
+    const g = new THREE.Group();
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.006, 12), mat(0xd9dde3));
+    const s1 = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.002, 0.002), mat(0x222222)); s1.position.y = 0.004;
+    const s2 = new THREE.Mesh(new THREE.BoxGeometry(0.002, 0.002, 0.012), mat(0x222222)); s2.position.y = 0.004;
+    g.add(head, s1, s2);
+    g.position.set(fx * sz.x / 2, sz.y, fz * sz.z / 2);
+    part.add(g);
+    const h = {g, base: sz.y, spin: 0, turned: false, depth: 0};
+    CUR_SCREWS.push(h); ALL_SCREWS.push(h);
+  }
+}
+function spawnSparks(g){
+  const p = new THREE.Vector3(); g.getWorldPosition(p);
+  for(let i = 0; i < 10; i++){
+    const m = new THREE.Mesh(SPARK_GEO, new THREE.MeshBasicMaterial({color: i % 2 ? 0xffe066 : 0xffffff}));
+    m.position.copy(p); scene.add(m);
+    SPARKS.push({m, v: new THREE.Vector3((Math.random()-0.5)*0.6, Math.random()*0.5+0.2, (Math.random()-0.5)*0.6), life: 0.6});
+  }
+}
+function updateScrews(dt){
+  ALL_SCREWS.forEach(h => {
+    if(h.spin > 0){ h.g.rotation.y += dt * Math.PI * 14; h.spin = Math.max(0, h.spin - dt * 4); }
+    h.depth += ((h.turned ? 1 : 0) - h.depth) * Math.min(1, dt * 10);
+    h.g.position.y = h.base - 0.003 * h.depth;
+  });
+  for(let i = SPARKS.length - 1; i >= 0; i--){
+    const s = SPARKS[i];
+    s.life -= dt; s.v.y -= 9 * dt; s.m.position.addScaledVector(s.v, dt);
+    if(s.life <= 0){ scene.remove(s.m); SPARKS.splice(i, 1); }
+  }
+}
 function screw(){
   S.screws++;
   SFX.screw();
+  pressAmt = 1;
+  const hd = CUR_SCREWS[S.screws - 1];
+  if(hd){ hd.spin = 1; hd.turned = true; }
   if(S.screws < S.screwNeed) return say(`ネジ ${S.screws}/${S.screwNeed}`);
   const label = S.steps[S.step].label;
   S.screwing = false; S.step++;
+  if(hd) spawnSparks(hd.g);
   setTimeout(() => SFX.ding(), 150);
   say(`✅ ${label} 取付完了`);
   if(S.step >= S.steps.length){ S.phase = 'test'; say('全部取り付けた。電源ボタンを押して動作確認しよう。'); }
@@ -1122,12 +1230,12 @@ function power(){
   openPanel(`<h3>電源ON</h3>
     <p>${ok ? '画面にロゴ。BIOSも問題なし。OSが立ち上がった…完璧だ。' : '起動はしたが、何かがおかしい…。このまま渡すわけにはいかない。'}</p>` +
     hw.map(x => `<div class="${x.ok?'ok':'ng'}">${x.ok?'✅':'❌'} ${x.text}</div>`).join('') + extra +
-    `<p class="muted">ベンチマーク：約${Math.round(perf()*1.3)} fps</p>
+    `<p class="muted">ベンチマーク：約${Math.round(perf()*1.3)} fps<br><span class="muted">基準：フルHD（1920×1080）・高画質・平均フレームレート（CPUとGPUの性能から算出した目安）</span></p>
      <button class="btn primary" data-act="toPack">梱包へ進む</button>`, false);
 }
 function openBox(){
   if(S.packDone.includes('pc')) { SFX.error(); return say('もう封をしたあとだ…'); }
-  openPanel(`<h3>ダンボールを選ぶ</h3><p class="muted">本体のサイズに合う箱を選ぼう。</p>` +
+  openPanel(`<h3>ダンボールを選ぶ</h3><p class="muted">本体のサイズに合う箱を選ぼう。</p>${projHtml()}` +
     Object.entries(BOX).map(([k,b]) => `<button class="btn ${S.box===k?'on':''}" data-act="setBox" data-arg="${k}">${S.box===k?'✅ ':''}${b.name}　<span class="gold">${yen(b.cost)}</span></button>`).join(''));
 }
 function packStep(){
@@ -1148,7 +1256,7 @@ function packStep(){
 }
 function openShip(){
   SFX.open();
-  openPanel(`<h3>配送カウンター</h3><p class="muted">送り方を選んでください。</p>` +
+  openPanel(`<h3>配送カウンター</h3><p class="muted">送り方を選んでください。</p>${projHtml()}` +
     Object.entries(SHIP).map(([k,s]) => `<button class="btn ${S.ship===k?'on':''}" data-act="setShip" data-arg="${k}">${S.ship===k?'✅ ':''}${s.name}　<span class="gold">${yen(s.cost)}</span>／${s.days}日${s.ins?'／配送事故を補償':''}</button>`).join('') +
     `<button class="btn primary" data-act="shipNow" ${S.ship?'':'disabled'}>📦 発送する</button>`);
 }
@@ -1226,11 +1334,36 @@ function openEnd(){
     <p>平均評価 ${avg} ★　ランク：<b>${rank}</b></p>
     <button class="btn primary" data-act="restart">はじめからやり直す</button>`, false);
 }
+// 見込みの収支（finish()と同じ計算。チップは品質で変わるので除く）
+function projection(){
+  const o = curO();
+  const isRepair = !!(o.repair && S.repair);
+  const late = isRepair ? (S.day || 1) - (o.repair.deadline || 0) : 0;
+  const rev = isRepair ? Math.round(o.budget * (late <= 0 ? 1.3 : Math.max(0.3, 1 - 0.2*late))) : o.budget;
+  const parts = isRepair ? ((PARTS[S.repair.key].find(p => p.id === S.cart[S.repair.key]) || {price:0}).price) : total();
+  const box = S.box ? BOX[S.box].cost : 0;
+  const ship = S.ship ? SHIP[S.ship].cost : 0;
+  return {rev, parts, box, ship, base: rev - parts - box - ship, isRepair, late};
+}
+function projHtml(){
+  const p = projection();
+  const ok = p.base >= 0;
+  const notes = [];
+  if(p.isRepair) notes.push(p.late <= 0 ? '修理は期限内なので報酬 +30%' : `修理は期限を${p.late}日過ぎているので報酬が減額`);
+  if(!S.box) notes.push('箱は未選択（0円で計算）');
+  if(!S.ship) notes.push('送料は未選択（0円で計算）');
+  return `<div class="proj" style="border:1px solid ${ok ? '#2e7d4f' : '#a33'};border-radius:10px;padding:8px 10px;margin:8px 0;text-align:left">
+    <b class="${ok ? 'ok' : 'ng'}">${ok ? '✅ 黒字の見込み' : '⚠ 赤字の見込み'}：${ok ? '+' : '−'}${yen(Math.abs(p.base))}</b><br>
+    <span class="muted">売上 ${yen(p.rev)} − 部品 ${yen(p.parts)} − 箱 ${yen(p.box)} − 送料 ${yen(p.ship)}</span><br>
+    <span class="muted">※チップ（品質で0〜5,000円）は含みません。${notes.join('／')}</span>
+  </div>`;
+}
 function openShelf(k){
   SFX.open();
   const c = CAT.find(x => x.key === k);
-  openPanel(`<h3>${c.label}の棚</h3><p class="muted">一つ選ぶと、作業台に運ぶ用のパーツが準備されます。</p><p>選んだパーツの合計：<b class="gold">${yen(total())}</b>　予算：${yen(curO().budget)}</p>` +
-    PARTS[k].map(p => `<button class="btn ${S.cart[k]===p.id?'on':''}" data-act="setPart" data-arg="${k}|${p.id}">${S.cart[k]===p.id?'✅ ':''}${p.name}　<span class="gold">${yen(p.price)}</span>　在庫 ${stockOf(p.id)}</button>`).join(''));
+  openPanel(`<h3>${c.label}の棚</h3><p class="muted">一つ選ぶと、作業台に運ぶ用のパーツが準備されます。</p>${projHtml()}<p>選んだパーツの合計：<b class="gold">${yen(total())}</b>　予算：${yen(curO().budget)}</p>` +
+    PARTS[k].map(p => `<button class="btn ${S.cart[k]===p.id?'on':''}" data-act="setPart" data-arg="${k}|${p.id}">${S.cart[k]===p.id?'✅ ':''}${p.name}　<span class="gold">${yen(p.price)}</span>　在庫 ${stockOf(p.id)}</button>`).join('') +
+    (S.cart[k] && !(S.repair && S.cart[k] === S.repair.brokenId) ? `<button class="btn" data-act="unsetPart" data-arg="${k}">✖ 選んだ${c.label}を棚に戻す（取り消し）</button>` : ''));
 }
 
 // ===== インタラクト =====
@@ -1339,6 +1472,7 @@ function objBuild(){
 }
 
 const ACT = {
+  resume(){ resumeGame(); },
   startBuild(){ if(checks().ready){ closePanel(); startBuild(); } else showReadiness(); },
   accept(){ S.phase = 'shop'; SFX.click(); closePanel(); if(curO().repair){ startRepairWorld(); return say('修理を受けた。棚で故障した部品の代わりを選んで、組み立て台で交換しよう。'); } say('注文を受けた。左の棚から部品を選ぼう。'); },
   setPart(arg){
@@ -1355,6 +1489,17 @@ const ACT = {
     SFX.click();
     closePanel();
     say(`${LABEL[k]}：${get(k).name} を選んだ。`);
+  },
+  unsetPart(k){
+    const old = S.cart[k];
+    if(!old) return;
+    if(S.repair && (k !== S.repair.key || old === S.repair.brokenId)){ SFX.error(); return say('修理中は、壊れた部品を外せません。'); }
+    stockAdd(old, 1);
+    delete S.cart[k];
+    rebuildPartsTable();
+    SFX.click();
+    closePanel();
+    say(`${LABEL[k]}を棚に戻した。`);
   },
   setBox(arg){
     S.box = arg; showPackBox(); SFX.box(); closePanel();
@@ -1393,11 +1538,13 @@ const ACT = {
     for(let i = REPAIR_Q.length-1; i >= 0; i--){
       if(nd > REPAIR_Q[i].deadline + 1){ REPAIR_Q.splice(i,1); S.rep = Math.max(0, S.rep - 1); }
     }
+    dayEnding = false; lastDayRec = null;
     S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:nd});
-    resetWorld(); openMissionChoice();
+    resetWorld(); persist(); openMissionChoice();
+    if(Math.random() < 0.25) startMgrHelp();
     say(`${nd}日目。期限の近い修理から確認しよう。`);
   },
-  closeShopFinal(){ SFX.click(); if(S.phase !== 'result') returnCart(); persist(); S.phase = 'end'; openEnd(); },
+  closeShop(){ SFX.click(); if(S.phase !== 'result') returnCart(); endOfDay(); },
   hire(arg){
     if(!SAVE.isManager) return;
     SAVE.staff = SAVE.staff || {reg:0,restock:0,repair:0};
@@ -1406,7 +1553,8 @@ const ACT = {
     say(`${STAFF_NAME[arg]}を雇った。月給 ${yen(SALARY[arg])}（30日ごとに支払い）。`);
     openMgmt();
   },
-  showLedgerAct(){ openLedger(); },
+  showLedgerAct(arg){ openLedger(arg === 'summary'); },
+  backToSummary(){ SFX.click(); openDaySummary(lastDayRec, lastDayMonthly); },
   ownerNext(){
     stopBgm(); SFX.click();
     SAVE.isManager = true; persist();
@@ -1439,11 +1587,10 @@ const ACT = {
     ORDERS[S.orderIdx] = cand;
     SFX.click(); openOrder();
   },
-  closeShop(){ SFX.click(); persist(); S.phase = 'end'; openEnd(); },
   restart(){
     SFX.click(); tutIdx = -1; ORDERS = [];
-    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; SAVE.day = 1; SAVE.ledger = []; SAVE.isManager = false; SAVE.staff = {reg:0,restock:0,repair:0}; writeSave();
-    dayClock = 0;
+    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; SAVE.day = 1; SAVE.profit = 0; SAVE.ledger = []; SAVE.isManager = false; SAVE.staff = {reg:0,restock:0,repair:0}; writeSave();
+    dayClock = 0; dayEnding = false; lastDayRec = null;
     CUST.forEach(c => scene.remove(c.mesh)); CUST.length = 0; REGC = null; REPAIR_Q.length = 0; custTimer = 12;
     Object.keys(STOCK).forEach(k => delete STOCK[k]);
     S = newState(); resetWorld(); openMissionChoice();
@@ -1517,7 +1664,7 @@ btnDrop.addEventListener('pointerdown', e => { e.preventDefault(); if(!uiOpen) d
 
 // 画面の右側をなぞって見回す
 let lookId = null, lookX = 0, lookY = 0;
-const UI_SEL = '#joy,#btnAct,#btnDrop,#panel,#mute,#mailBtn,#setBtn,#tut,#start';
+const UI_SEL = '#joy,#btnAct,#btnDrop,#panel,#mute,#mailBtn,#setBtn,#pauseBtn,#tut,#start';
 window.addEventListener('pointerdown', e => {
   if(e.pointerType !== 'touch' || uiOpen) return;
   if(e.target.closest && e.target.closest(UI_SEL)) return;
@@ -1567,6 +1714,7 @@ function managerTalk(){
 
 // ===== 日付・売上表・店長の昇進・雇用 =====
 let gameStarted = false, dayClock = 0;
+let dayEnding = false, lastDayRec = null, lastDayMonthly = null;
 const DAY_SEC = 510; // 現実時間の8分30秒で1日
 const SALARY = {reg:120000, restock:100000, repair:150000};
 const STAFF_NAME = {reg:'レジ係', restock:'補充係', repair:'修理係'};
@@ -1586,11 +1734,15 @@ function monthlyCosts(){
   return {items, total: items.reduce((a,b) => a + b[1], 0)};
 }
 function endOfDay(){
+  if(dayEnding) return;
+  dayEnding = true;
   const d = S.day || 1;
   const monthly = (d % 30 === 0) ? monthlyCosts() : null;
   if(monthly) S.money -= monthly.total;
   const sales = S.dayIncome || 0, exp = S.dayExpense || 0, fixed = monthly ? monthly.total : 0;
   const rec = {day:d, sales, costs: exp + fixed, profit: sales - exp - fixed, money: S.money};
+  SAVE.profit = (SAVE.profit || 0) + rec.profit;
+  lastDayRec = rec; lastDayMonthly = monthly;
   SAVE.ledger = (SAVE.ledger || []).concat([rec]).slice(-120);
   persist();
   if(d % 30 === 0 && S.money >= 10000000 && !SAVE.isManager) return ownerFires();
@@ -1601,11 +1753,12 @@ function openDaySummary(rec, monthly){
   openPanel(`<h3>${rec.day}日目の終わり</h3>
     <p>今日の売上 <b>${yen(rec.sales)}</b>　経費 <b>${yen(rec.costs - (monthly ? monthly.total : 0))}</b></p>${m}
     <p>所持金 <b class="gold">${yen(S.money)}</b></p>
-    <p class="muted">時間になったので、作業中の注文は取り消しになりました。</p>
+    <p>店の利益（累計）<b class="ok">${yen(SAVE.profit || 0)}</b>　※所持金とは別に、毎日の利益を積み上げます</p>
+    <p class="muted">営業を終えました。作業中の注文があれば取り消しになります。</p>
     <button class="btn primary" data-act="nextDay">次の日へ</button>
-    <button class="btn" data-act="showLedgerAct">📊 売上表を見る</button>`, false);
+    <button class="btn" data-act="showLedgerAct" data-arg="summary">📊 売上表を見る</button>`, false);
 }
-function openLedger(){
+function openLedger(fromSummary){
   SFX.open();
   const L = (SAVE.ledger || []).slice(-30).reverse();
   const cur = S.dayIncome !== undefined ? `<tr><td>${S.day || 1}日目（営業中）</td><td style="text-align:right">${yen(S.dayIncome || 0)}</td><td style="text-align:right">${yen(S.dayExpense || 0)}</td><td style="text-align:right">${yen((S.dayIncome || 0) - (S.dayExpense || 0))}</td></tr>` : '';
@@ -1613,8 +1766,8 @@ function openLedger(){
     <p class="muted">日ごとの売上・経費・利益（直近30日）。30日ごとに家賃・光熱費・人件費が引かれます。</p>
     <table style="width:100%;font-size:13px"><tr><th style="text-align:left">日</th><th>売上</th><th>経費</th><th>利益</th></tr>${cur}
     ${L.map(r => `<tr><td>${r.day}日目</td><td style="text-align:right">${yen(r.sales)}</td><td style="text-align:right">${yen(r.costs)}</td><td style="text-align:right" class="${r.profit >= 0 ? 'ok' : 'ng'}">${yen(r.profit)}</td></tr>`).join('')}</table>
-    <p>所持金 <b class="gold">${yen(S.money)}</b></p>
-    <button class="btn" data-act="close">閉じる</button>`);
+    <p>所持金 <b class="gold">${yen(S.money)}</b>　店の利益（累計）<b class="ok">${yen(SAVE.profit || 0)}</b></p>
+    ${fromSummary ? '<button class="btn primary" data-act="backToSummary">← 日の結果に戻る</button>' : ''}`, !fromSummary);
 }
 // 店長の経営メニュー（昇進後の机）
 function openMgmt(){
@@ -1723,6 +1876,7 @@ function spawnCustomer(){
   const used = CUST.filter(c => c.state !== 'leave').map(c => c.slot);
   const slot = [0,1].find(i => !used.includes(i)); if(slot === undefined) return;
   const g = makeCustomer(); g.position.set(CUST_ENTRY.x, 0, CUST_ENTRY.z); scene.add(g);
+  SFX.chirin(); say('お客さんが入ってきた。');
   const c = {mesh:g, state:'walk', wait:55, slot, kind:'buy', item:null, repair:null};
   const cands = [];
   ['cpu','mb','ram','gpu','psu','cooler','storage','hdd','fan'].forEach(k => PARTS[k].forEach(p => { if(stockOf(p.id) > 0) cands.push({key:k, part:p}); }));
@@ -1784,8 +1938,7 @@ function openExit(){
   openPanel(`<h3>出口</h3><p>今日の営業を終えて帰りますか？</p>
     <p>所持金 <b class="gold">${yen(S.money)}</b>　累計納品 ${S.done || 0} 件</p>
     ${working ? '<p class="muted">作りかけの注文は取り消しになり、棚の部品は在庫に戻ります。</p>' : ''}
-    <button class="btn primary" data-act="nextDay">閉店して、次の営業日へ</button>
-    <button class="btn" data-act="closeShopFinal">店を畳む（最終結果を見る）</button>
+    <button class="btn primary" data-act="closeShop">閉店して、次の営業日へ</button>
     <button class="btn" data-act="cancelExit">まだ残る</button>`);
 }
 function startRepairWorld(){
@@ -1858,10 +2011,15 @@ function refreshContinue(){
 function saveCloud(){
   if(!fbUser || !fbDb) return;
   fbDb.collection('saves').doc(fbUser.uid).set({
-    money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach, started: !!SAVE.started,
+    money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach, started: !!SAVE.started, profit: SAVE.profit || 0,
     ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, staff: SAVE.staff || {reg:0,restock:0,repair:0},
     updated: firebase.firestore.FieldValue.serverTimestamp()
   }, {merge:true}).catch(() => setAuthStatus('クラウド保存に失敗しました（通信を確認）'));
+}
+function loadErrMsg(e){
+  if(e && e.code === 'permission-denied') return 'クラウドの保存データを読めません（Firestoreのルールで許可されていません）。この端末の保存で続けられます';
+  if(e && (e.message === 'timeout' || e.code === 'unavailable')) return 'クラウドに接続できません（Firestoreのデータベース作成や通信を確認）。この端末の保存で続けられます';
+  return '保存データの読み込みに失敗しました（' + ((e && (e.code || e.message)) || '不明') + '）';
 }
 async function loadCloud(){
   cloudLoading = true; setStartEnabled();
@@ -1871,11 +2029,11 @@ async function loadCloud(){
     const d = await Promise.race([ref.get(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
     if(d.exists){
       const j = d.data();
-      SAVE = Object.assign(SAVE, {started:!!j.started, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, staff:j.staff || {reg:0,restock:0,repair:0}});
+      SAVE = Object.assign(SAVE, {started:!!j.started, profit:j.profit||0, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, staff:j.staff || {reg:0,restock:0,repair:0}});
       writeSave();
     } else { resetSaveData(); saveCloud(); }
     setAuthStatus(`ログイン中：${fbUser.email}（クラウドに保存）`);
-  }catch(e){ setAuthStatus('保存データの読み込みに失敗しました（Firestoreのルールを確認）'); }
+  }catch(e){ setAuthStatus(loadErrMsg(e)); }
   finally{ cloudLoading = false; setStartEnabled(); refreshContinue(); }
 }
 async function authSignIn(){
@@ -1938,7 +2096,7 @@ function showAccount(u){
   if(u) document.getElementById('acctText').textContent = 'ログイン中：' + u.email;
 }
 function resetSaveData(){
-  SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, started:false, staff:{reg:0,restock:0,repair:0}};
+  SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, started:false, profit:0, staff:{reg:0,restock:0,repair:0}};
   writeSave();
 }
 function refreshStartButtons(){
@@ -2046,7 +2204,7 @@ wireSettingsUI();
 
 // ===== セーブ・実績・次の任務 =====
 const SAVE_KEY = 'pcws-save-v1';
-let SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, staff:{reg:0,restock:0,repair:0}};
+let SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, profit:0, staff:{reg:0,restock:0,repair:0}};
 try{ const j = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if(j) SAVE = Object.assign(SAVE, j); }catch(e){}
 function writeSave(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); }catch(e){} }
 function persist(){ SAVE.money = S.money; SAVE.rep = S.rep; SAVE.done = S.done || 0; SAVE.day = S.day || 1; writeSave(); saveCloud(); }
@@ -2091,6 +2249,49 @@ function startGame(withTut, cont){
 }
 document.getElementById('tutYes').addEventListener('click', () => startGame(true));
 document.getElementById('tutNo').addEventListener('click', () => startGame(false));
+
+// ===== 店長のちょこっと手伝い =====
+let mgrHelp = null;
+function startMgrHelp(){
+  if(!MGR_MESH_REF || SAVE.isManager) return;
+  mgrHelp = {t: 0, phase: 'in'};
+  say('今日は店長が事務室から顔を出した…');
+}
+function updateMgrHelp(dt){
+  if(!mgrHelp) return;
+  if(!MGR_MESH_REF){ mgrHelp = null; return; }
+  const m = MGR_MESH_REF, home = {x: 10.5, z: -11.1}, work = {x: -0.5, z: 4.5};
+  const goTo = (tg, sp) => {
+    const dx = tg.x - m.position.x, dz = tg.z - m.position.z, d = Math.hypot(dx, dz);
+    if(d < 0.05) return true;
+    const step = Math.min(d, sp * dt);
+    m.position.x += dx / d * step; m.position.z += dz / d * step; m.rotation.y = Math.atan2(dx, dz);
+    return false;
+  };
+  mgrHelp.t += dt;
+  if(mgrHelp.phase === 'in'){
+    if(goTo(work, 2.2)){ mgrHelp.phase = 'work'; mgrHelp.t = 0; restockAll(); SFX.ding(); say('店長が在庫を補充してくれた（全部品 +1）。'); }
+  } else if(mgrHelp.phase === 'work'){
+    if(mgrHelp.t > 1.5) mgrHelp.phase = 'out';
+  } else if(mgrHelp.phase === 'out'){
+    if(goTo(home, 2.2)) mgrHelp = null;
+  }
+}
+
+// ===== 一時停止 =====
+let paused = false;
+function resumeGame(){ paused = false; SFX.click(); closePanel(); }
+function togglePause(){
+  if(!gameStarted) return;
+  if(document.getElementById('start').style.display === 'flex') return;
+  if(!paused){
+    if(uiOpen) return;
+    paused = true; SFX.click();
+    openPanel(`<h3>⏸ 一時停止中</h3><p class="muted">時間もお客さんも止まっています。</p><button class="btn primary" data-act="resume">再開する</button>`, false);
+  } else resumeGame();
+}
+document.getElementById('pauseBtn').addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); togglePause(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' || e.key === 'p' || e.key === 'P') togglePause(); });
 
 // ===== ループ =====
 function move(dt){
@@ -2176,19 +2377,33 @@ const hvec = {L:new THREE.Vector3(-0.3,-0.42,-0.55), R:new THREE.Vector3(0.3,-0.
   const hand = new THREE.Mesh(new THREE.BoxGeometry(0.09,0.08,0.1), mat(SKIN)); HANDS.add(hand);
   HAND[side] = {arm, hand};
 });
+const DRIVER = new THREE.Group();
+{
+  const dShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.16, 8), mat(0xbfc5cc));
+  dShaft.rotation.x = Math.PI / 2; dShaft.position.z = -0.1;
+  const dHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.09, 12), mat(0xe74c3c));
+  dHandle.rotation.x = Math.PI / 2; dHandle.position.z = 0.02;
+  DRIVER.add(dShaft, dHandle); DRIVER.visible = false; HAND.R.hand.add(DRIVER);
+}
+let pressAmt = 0;
 function updateHands(dt){
+  pressAmt = Math.max(0, pressAmt - dt * 5);
   const anc = held ? (held.type === 'part' ? held.mesh.position : held.type === 'case' ? caseGroup.position : null) : null;
+  const sc = !!S.screwing;
   const t = {
-    L: anc ? new THREE.Vector3(anc.x-0.13, anc.y-0.03, anc.z+0.03) : new THREE.Vector3(-0.3,-0.42,-0.55),
-    R: anc ? new THREE.Vector3(anc.x+0.13, anc.y-0.03, anc.z+0.03) : new THREE.Vector3(0.3,-0.42,-0.55),
+    L: anc ? new THREE.Vector3(anc.x-0.13, anc.y-0.03, anc.z+0.03) : sc ? new THREE.Vector3(-0.2,-0.3,-0.5) : new THREE.Vector3(-0.3,-0.42,-0.55),
+    R: anc ? new THREE.Vector3(anc.x+0.13, anc.y-0.03, anc.z+0.03) : sc ? new THREE.Vector3(0.22,-0.3,-0.5) : new THREE.Vector3(0.3,-0.42,-0.55),
   };
   ['L','R'].forEach(side => {
     hvec[side].lerp(t[side], Math.min(1, dt*10));
     const v = hvec[side];
     HAND[side].hand.position.copy(v);
+    if(side === 'R' && sc) HAND.R.hand.position.z -= pressAmt * 0.05;
     HAND[side].arm.position.set(v.x*1.05, v.y-0.12, v.z+0.22);
     HAND[side].arm.rotation.x = 0.35;
   });
+  DRIVER.visible = sc;
+  if(sc && pressAmt > 0) DRIVER.rotation.z += dt * 22;
 }
 
 let last = performance.now();
@@ -2197,13 +2412,15 @@ const promptEl = document.getElementById('prompt');
 let tutShown = -2;
 function loop(t){
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
-  if(!uiOpen) move(dt);
-  if(gameStarted){
+  if(!uiOpen && !paused) move(dt);
+  if(gameStarted && !paused && !dayEnding){
     updateCustomers(dt);
+    updateMgrHelp(dt);
     restockT += dt; if(restockT >= restockPeriod()){ restockT = 0; restockAll(); }
-    dayClock += dt; if(dayClock >= DAY_SEC){ dayClock = 0; if(S.phase !== 'end') endOfDay(); }
+    dayClock += dt; if(dayClock >= DAY_SEC){ dayClock = 0; endOfDay(); }
   }
   updateHands(dt);
+  updateScrews(dt);
   updateClock();
   camera.rotation.set(pitch, yaw, 0, 'YXZ');
 
@@ -2217,8 +2434,8 @@ function loop(t){
   }
 
   document.getElementById('obj').textContent = '目標：' + objective();
-  document.getElementById('stat').textContent = `所持金 ${yen(S.money)}　評判 ${S.rep}　${S.day || 1}日目　累計 ${S.done || 0}件　損傷 ${S.damage}`;
-  document.getElementById('total').textContent = `選んだパーツ合計 ${yen(total())} ／ 予算 ${yen(curO().budget)}`;
+  document.getElementById('stat').textContent = `所持金 ${yen(S.money)}　店の利益 ${yen(SAVE.profit || 0)}　評判 ${S.rep}　${S.day || 1}日目　累計 ${S.done || 0}件　損傷 ${S.damage}`;
+  { const p = projection(); document.getElementById('total').textContent = `選んだパーツ合計 ${yen(total())} ／ 予算 ${yen(curO().budget)}　｜　見込み：${p.base >= 0 ? '黒字 +' : '赤字 −'}${yen(Math.abs(p.base))}`; }
 
   updateTarget();
   const near = uiOpen ? null : nearest();
