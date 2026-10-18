@@ -22,6 +22,7 @@ canvas{display:block;touch-action:none}
 #mailBtn{right:60px}
 #mute{right:12px}
 #ledgerBtn{right:156px}
+#setBtn{right:204px}
 #clock{position:fixed;top:10px;left:10px;z-index:9;background:#000a;border:1px solid #ffffff44;border-radius:10px;padding:6px 10px;font-size:14px;color:#fff;pointer-events:none}
 #achBtn{right:108px}
 #panel{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:5}
@@ -57,6 +58,7 @@ canvas{display:block;touch-action:none}
 <div id="mailBtn" class="iconbtn">📩</div>
 <div id="achBtn" class="iconbtn">🏆</div>
 <div id="ledgerBtn" class="iconbtn">📊</div>
+<div id="setBtn" class="iconbtn">⚙</div>
 <div id="mute" class="iconbtn">🔊</div>
 <div id="clock" style="display:none"></div>
 <div id="tut"><div class="txt"><span class="tag"></span><span class="body"></span></div><button id="tutSkip">スキップ</button></div>
@@ -70,30 +72,46 @@ canvas{display:block;touch-action:none}
 <div id="btnDrop">置く</div>
 
 <div id="start"><div>
-  <b>🔧 自作PC工房</b><br>
-  あなたは小さな自作PC工房の店主。<br>
-  <span id="startText"></span><br><br>
-  <div id="authBox" style="text-align:left;margin:8px 0">
-    <div id="loginView">
-      <input class="inp" id="authEmail" type="email" placeholder="メールアドレス" autocomplete="username">
-      <input class="inp" id="authPw" type="password" placeholder="パスワード" autocomplete="current-password">
-      <div style="display:flex;gap:8px"><button class="btn" id="authIn" style="flex:1">ログイン</button><button class="btn" id="authUp" style="flex:1">新規登録の画面へ</button></div>
+  <div id="mainView">
+    <b>🔧 自作PC工房</b><br>
+    あなたは小さな自作PC工房の店主。<br>
+    <span id="startText"></span><br><br>
+    <div id="authBox" style="text-align:left;margin:8px 0">
+      <div id="loginView">
+        <input class="inp" id="authEmail" type="email" placeholder="メールアドレス" autocomplete="username">
+        <input class="inp" id="authPw" type="password" placeholder="パスワード" autocomplete="current-password">
+        <div style="display:flex;gap:8px"><button class="btn" id="authIn" style="flex:1">ログイン</button><button class="btn" id="authUp" style="flex:1">新規登録の画面へ</button></div>
+        <button class="btn" id="authForgot" style="font-size:13px">パスワードを忘れた場合</button>
+      </div>
+      <div id="acctView" style="display:none">
+        <p id="acctText" style="margin:4px 0;font-weight:bold"></p>
+        <button class="btn" id="authOut" style="width:100%">ログアウト</button>
+      </div>
+      <div id="signupView" style="display:none">
+        <p style="margin:4px 0;font-weight:bold">新規登録</p>
+        <input class="inp" id="suEmail" type="email" placeholder="メールアドレス（例: name@example.com）" autocomplete="email">
+        <input class="inp" id="suPw" type="password" placeholder="パスワード（6文字以上）" autocomplete="new-password">
+        <input class="inp" id="suPw2" type="password" placeholder="パスワード（もう一度入力）" autocomplete="new-password">
+        <div style="display:flex;gap:8px"><button class="btn primary" id="suSubmit" style="flex:1">登録する</button><button class="btn" id="suBack" style="flex:1">戻る</button></div>
+      </div>
+      <div id="authStatus" class="muted" style="font-size:13px"></div>
     </div>
-    <div id="acctView" style="display:none">
-      <p id="acctText" style="margin:4px 0;font-weight:bold"></p>
-      <button class="btn" id="authOut" style="width:100%">ログアウト</button>
-    </div>
-    <div id="signupView" style="display:none">
-      <p style="margin:4px 0;font-weight:bold">新規登録</p>
-      <input class="inp" id="suEmail" type="email" placeholder="メールアドレス（例: name@example.com）" autocomplete="email">
-      <input class="inp" id="suPw" type="password" placeholder="パスワード（6文字以上）" autocomplete="new-password">
-      <input class="inp" id="suPw2" type="password" placeholder="パスワード（もう一度入力）" autocomplete="new-password">
-      <div style="display:flex;gap:8px"><button class="btn primary" id="suSubmit" style="flex:1">登録する</button><button class="btn" id="suBack" style="flex:1">戻る</button></div>
-    </div>
-    <div id="authStatus" class="muted" style="font-size:13px"></div>
+    <button class="btn primary" id="tutYes">チュートリアルを見て始める</button>
+    <button class="btn primary" id="tutNo">チュートリアルなしで始める</button>
+    <button class="btn" id="setOpen">⚙ 設定</button>
   </div>
-  <button class="btn primary" id="tutYes">チュートリアルを見て始める</button>
-  <button class="btn" id="tutNo">チュートリアルなしで始める</button>
+  <div id="settingsView" style="display:none;text-align:left">
+    <b style="display:block;text-align:center">⚙ 設定</b>
+    <p id="setAcct" class="muted" style="margin:8px 0"></p>
+    <div id="setLoggedIn" style="display:none">
+      <button class="btn" id="setPw">パスワードを再設定する（メールを送ります）</button>
+      <p style="font-size:13px;margin:8px 0 2px">アカウント削除：確認のため現在のパスワードを入力してください</p>
+      <input class="inp" id="setPwIn" type="password" placeholder="現在のパスワード" autocomplete="current-password">
+      <button class="btn" id="setDel" style="border-color:#c33;color:#f88">アカウントを削除する</button>
+    </div>
+    <button class="btn" id="setBack">戻る</button>
+    <div id="setStatus" class="muted" style="font-size:13px"></div>
+  </div>
 </div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1499,7 +1517,7 @@ btnDrop.addEventListener('pointerdown', e => { e.preventDefault(); if(!uiOpen) d
 
 // 画面の右側をなぞって見回す
 let lookId = null, lookX = 0, lookY = 0;
-const UI_SEL = '#joy,#btnAct,#btnDrop,#panel,#mute,#mailBtn,#tut,#start';
+const UI_SEL = '#joy,#btnAct,#btnDrop,#panel,#mute,#mailBtn,#setBtn,#tut,#start';
 window.addEventListener('pointerdown', e => {
   if(e.pointerType !== 'touch' || uiOpen) return;
   if(e.target.closest && e.target.closest(UI_SEL)) return;
@@ -1814,6 +1832,7 @@ let fbAuth = null, fbDb = null, fbUser = null;
 function setAuthStatus(t){ const el = document.getElementById('authStatus'); if(el) el.textContent = t; }
 function authMsg(e){
   return ({
+    'auth/too-many-requests':'操作が多すぎます。少し時間をおいてから試してください',
     'auth/invalid-email':'メールアドレスの形式が正しくありません',
     'auth/weak-password':'パスワードは6文字以上にしてください',
     'auth/invalid-credential':'メールアドレスかパスワードが違います',
@@ -1826,6 +1845,7 @@ function authMsg(e){
 }
 function fbReady(){ return !!FIREBASE_CONFIG && typeof firebase !== 'undefined'; }
 function refreshContinue(){
+  refreshStartButtons();
   const old = document.getElementById('contBtn'); if(old) old.remove();
   if(!(SAVE.done > 0)) return;
   const b = document.createElement('button');
@@ -1838,7 +1858,7 @@ function refreshContinue(){
 function saveCloud(){
   if(!fbUser || !fbDb) return;
   fbDb.collection('saves').doc(fbUser.uid).set({
-    money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach,
+    money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach, started: !!SAVE.started,
     ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, staff: SAVE.staff || {reg:0,restock:0,repair:0},
     updated: firebase.firestore.FieldValue.serverTimestamp()
   }, {merge:true}).catch(() => setAuthStatus('クラウド保存に失敗しました（通信を確認）'));
@@ -1848,10 +1868,10 @@ async function loadCloud(){
   setAuthStatus('クラウドから保存データを読み込んでいます…');
   try{
     const ref = fbDb.collection('saves').doc(fbUser.uid);
-    const d = await ref.get();
+    const d = await Promise.race([ref.get(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
     if(d.exists){
       const j = d.data();
-      SAVE = Object.assign(SAVE, {money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, staff:j.staff || {reg:0,restock:0,repair:0}});
+      SAVE = Object.assign(SAVE, {started:!!j.started, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, staff:j.staff || {reg:0,restock:0,repair:0}});
       writeSave();
     } else { resetSaveData(); saveCloud(); }
     setAuthStatus(`ログイン中：${fbUser.email}（クラウドに保存）`);
@@ -1918,8 +1938,76 @@ function showAccount(u){
   if(u) document.getElementById('acctText').textContent = 'ログイン中：' + u.email;
 }
 function resetSaveData(){
-  SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, staff:{reg:0,restock:0,repair:0}};
+  SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, started:false, staff:{reg:0,restock:0,repair:0}};
   writeSave();
+}
+function refreshStartButtons(){
+  const played = !!SAVE.started || SAVE.done > 0;
+  document.getElementById('tutYes').style.display = played ? 'none' : 'block';
+  document.getElementById('tutNo').textContent = played ? 'ゲームを始める' : 'チュートリアルなしで始める';
+}
+function maskEmail(em){ return (em || '').slice(0, 2) + '****'; }
+function setSetStatus(t){ const el = document.getElementById('setStatus'); if(el) el.textContent = t; }
+function refreshSettings(){
+  const on = !!(fbAuth && fbAuth.currentUser);
+  document.getElementById('setAcct').textContent = on
+    ? 'ログイン中：' + maskEmail(fbAuth.currentUser.email) + '（最初の2文字のみ表示）'
+    : 'ログインしていません（この端末に保存しています）';
+  document.getElementById('setLoggedIn').style.display = on ? 'block' : 'none';
+  setSetStatus('');
+}
+let settingsFromGame = false;
+function showSettings(fromGame){
+  settingsFromGame = fromGame;
+  document.getElementById('start').style.display = 'flex';
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('settingsView').style.display = 'block';
+  refreshSettings();
+}
+function hideSettings(){
+  document.getElementById('settingsView').style.display = 'none';
+  if(settingsFromGame) document.getElementById('start').style.display = 'none';
+  else document.getElementById('mainView').style.display = 'block';
+}
+async function sendResetFor(em){
+  try{ await fbAuth.sendPasswordResetEmail(em); return '再設定用のメールを送りました。メール内のリンクから新しいパスワードを設定してください（届かない場合は迷惑メールも確認）'; }
+  catch(e){ return '送信できません：' + authMsg(e); }
+}
+async function deleteAccount(){
+  const u = fbAuth && fbAuth.currentUser; if(!u) return;
+  const pwEl = document.getElementById('setPwIn'); const pw = pwEl.value;
+  if(!pw) return setSetStatus('削除するには、確認のため現在のパスワードを入力してください');
+  if(!confirm('アカウントとクラウドの保存データを完全に削除します。元に戻せません。よろしいですか？')) return;
+  try{
+    await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email, pw));
+    await fbDb.collection('saves').doc(u.uid).delete();
+    await u.delete();
+    pwEl.value = '';
+    fbUser = null;
+    resetSaveData();
+    showAccount(null);
+    cloudLoading = false;
+    refreshContinue();
+    setStartEnabled();
+    refreshSettings();
+    setSetStatus('アカウントを削除しました');
+  }catch(e){ setSetStatus('削除できません：' + authMsg(e)); }
+}
+function wireSettingsUI(){
+  document.getElementById('setOpen').addEventListener('click', () => showSettings(false));
+  document.getElementById('setBack').addEventListener('click', hideSettings);
+  document.getElementById('setBtn').addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); if(!uiOpen && gameStarted) showSettings(true); });
+  document.getElementById('setPw').addEventListener('click', async () => {
+    const u = fbAuth && fbAuth.currentUser; if(!u) return;
+    setSetStatus(await sendResetFor(u.email));
+  });
+  document.getElementById('setDel').addEventListener('click', deleteAccount);
+  document.getElementById('authForgot').addEventListener('click', async () => {
+    const em = cleanEmail(document.getElementById('authEmail').value);
+    if(!em) return setAuthStatus('メールアドレスを入力してから、もう一度押してください');
+    if(!fbAuth) return setAuthStatus('ログインの準備ができていません');
+    setAuthStatus(await sendResetFor(em));
+  });
 }
 function initAuth(){
   const inBtn = document.getElementById('authIn'), upBtn = document.getElementById('authUp'), outBtn = document.getElementById('authOut');
@@ -1954,6 +2042,7 @@ function initAuth(){
   outBtn.addEventListener('click', () => { if(fbAuth) fbAuth.signOut(); });
 }
 initAuth();
+wireSettingsUI();
 
 // ===== セーブ・実績・次の任務 =====
 const SAVE_KEY = 'pcws-save-v1';
@@ -1992,6 +2081,7 @@ refreshContinue();
 
 function startGame(withTut, cont){
   ensureAudio();
+  if(!SAVE.started){ SAVE.started = true; writeSave(); saveCloud(); }
   document.getElementById('start').style.display = 'none';
   if(cont){ S = Object.assign(newState(), {money:SAVE.money, rep:SAVE.rep, done:SAVE.done, day:SAVE.day || 1}); tutIdx = -1; }
   else tutIdx = withTut ? 0 : -1;
