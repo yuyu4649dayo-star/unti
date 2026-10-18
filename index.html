@@ -77,7 +77,11 @@ canvas{display:block;touch-action:none}
     <div id="loginView">
       <input class="inp" id="authEmail" type="email" placeholder="メールアドレス" autocomplete="username">
       <input class="inp" id="authPw" type="password" placeholder="パスワード" autocomplete="current-password">
-      <div style="display:flex;gap:8px"><button class="btn" id="authIn" style="flex:1">ログイン</button><button class="btn" id="authUp" style="flex:1">新規登録の画面へ</button><button class="btn" id="authOut" style="flex:1;display:none">ログアウト</button></div>
+      <div style="display:flex;gap:8px"><button class="btn" id="authIn" style="flex:1">ログイン</button><button class="btn" id="authUp" style="flex:1">新規登録の画面へ</button></div>
+    </div>
+    <div id="acctView" style="display:none">
+      <p id="acctText" style="margin:4px 0;font-weight:bold"></p>
+      <button class="btn" id="authOut" style="width:100%">ログアウト</button>
     </div>
     <div id="signupView" style="display:none">
       <p style="margin:4px 0;font-weight:bold">新規登録</p>
@@ -1825,7 +1829,7 @@ function refreshContinue(){
   const old = document.getElementById('contBtn'); if(old) old.remove();
   if(!(SAVE.done > 0)) return;
   const b = document.createElement('button');
-  b.className = 'btn primary'; b.id = 'contBtn';
+  b.className = 'btn primary'; b.id = 'contBtn'; b.disabled = cloudLoading;
   b.textContent = `続きから（累計${SAVE.done}件・所持金 ${yen(SAVE.money)}）`;
   b.addEventListener('click', () => startGame(false, true));
   const t = document.getElementById('tutYes');
@@ -1840,6 +1844,8 @@ function saveCloud(){
   }, {merge:true}).catch(() => setAuthStatus('クラウド保存に失敗しました（通信を確認）'));
 }
 async function loadCloud(){
+  cloudLoading = true; setStartEnabled();
+  setAuthStatus('クラウドから保存データを読み込んでいます…');
   try{
     const ref = fbDb.collection('saves').doc(fbUser.uid);
     const d = await ref.get();
@@ -1847,10 +1853,10 @@ async function loadCloud(){
       const j = d.data();
       SAVE = Object.assign(SAVE, {money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, staff:j.staff || {reg:0,restock:0,repair:0}});
       writeSave();
-    } else saveCloud();
-    refreshContinue();
+    } else { resetSaveData(); saveCloud(); }
     setAuthStatus(`ログイン中：${fbUser.email}（クラウドに保存）`);
   }catch(e){ setAuthStatus('保存データの読み込みに失敗しました（Firestoreのルールを確認）'); }
+  finally{ cloudLoading = false; setStartEnabled(); refreshContinue(); }
 }
 async function authSignIn(){
   const em = cleanEmail(document.getElementById('authEmail').value);
@@ -1900,6 +1906,21 @@ async function authSignUp(){
   catch(e){ setAuthStatus('登録できません：' + authMsg(e)); }
   finally{ signingUp = false; }
 }
+let cloudLoading = false;
+function setStartEnabled(){
+  ['tutYes','tutNo'].forEach(id => { const b = document.getElementById(id); if(b) b.disabled = cloudLoading; });
+  const c = document.getElementById('contBtn'); if(c) c.disabled = cloudLoading;
+}
+function showAccount(u){
+  document.getElementById('loginView').style.display = u ? 'none' : 'block';
+  document.getElementById('signupView').style.display = 'none';
+  document.getElementById('acctView').style.display = u ? 'block' : 'none';
+  if(u) document.getElementById('acctText').textContent = 'ログイン中：' + u.email;
+}
+function resetSaveData(){
+  SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, staff:{reg:0,restock:0,repair:0}};
+  writeSave();
+}
 function initAuth(){
   const inBtn = document.getElementById('authIn'), upBtn = document.getElementById('authUp'), outBtn = document.getElementById('authOut');
   if(!fbReady()){
@@ -1910,12 +1931,20 @@ function initAuth(){
   try{
     firebase.initializeApp(FIREBASE_CONFIG);
     fbAuth = firebase.auth(); fbDb = firebase.firestore();
+    cloudLoading = true; setStartEnabled();
     fbAuth.onAuthStateChanged(u => {
       if(u && !u.emailVerified && !signingUp){ fbAuth.signOut(); return; }
+      const wasIn = !!fbUser;
       fbUser = u;
-      outBtn.style.display = u ? 'block' : 'none';
-      inBtn.style.display = upBtn.style.display = u ? 'none' : 'inline-block';
-      if(u) loadCloud(); else setAuthStatus('ログインしていません（この端末に保存します）');
+      showAccount(u);
+      if(u) loadCloud();
+      else {
+        cloudLoading = false;
+        if(wasIn) resetSaveData();
+        refreshContinue();
+        setAuthStatus('ログインしていません（この端末に保存します）');
+      }
+      setStartEnabled();
     });
   }catch(e){ setAuthStatus('Firebaseの初期化に失敗しました'); [inBtn, upBtn].forEach(b => b.disabled = true); }
   inBtn.addEventListener('click', authSignIn);
