@@ -1565,6 +1565,27 @@ function sortedParts(k){
   else if(SHELF_SORT === 'watt') arr.sort((a,b) => (b.watt || 0) - (a.watt || 0));
   return arr;
 }
+// 電源の計算：CPUの熱設計（TDP）＋GPUのTDP＋余裕80W が必要な電源の容量
+function psuNeed(){ const c = get('cpu'); if(!c) return null; const g = get('gpu'); return c.tdp + (g ? g.tdp : 0) + 80; }
+function psuInfoHtml(){
+  const c = get('cpu'), g = get('gpu'), need = psuNeed();
+  if(!c) return `<p class="muted">CPUを選ぶと、必要な電源の容量がここに出ます。</p>`;
+  return `<div style="border:1px solid #2c3558;border-radius:10px;padding:8px 10px;margin:6px 0">必要な電源：<b class="gold">${need}W以上</b><br><span class="muted">CPU ${c.tdp}W ＋ GPU ${g ? g.tdp + 'W' : 'なし（内蔵GPU）'} ＋ 余裕80W</span></div>`;
+}
+function psuJudge(p){
+  const need = psuNeed(); if(need === null) return '';
+  if(p.watt >= need){
+    const extra = p.watt - need;
+    return `　<span class="ok">✅ 足りる（余裕 ${extra}W）</span>` + (extra > 400 ? `<span class="muted">　※容量が大きすぎて割高</span>` : '');
+  }
+  return `　<span class="ng">❌ 足りない（あと ${need - p.watt}W）</span>`;
+}
+function psuHud(){
+  const need = psuNeed(); if(need === null) return '';
+  const p = get('psu');
+  if(!p) return `電源：必要 ${need}W以上`;
+  return p.watt >= need ? `電源 ✅ ${p.watt}W` : `電源 ❌ ${p.watt}W（必要 ${need}W）`;
+}
 function openShelf(k){
   SFX.open();
   const c = CAT.find(x => x.key === k);
@@ -1779,7 +1800,7 @@ const ACT = {
     openMgmt();
   },
   showLedgerAct(arg){ openLedger(arg === 'summary'); },
-  backToSummary(){ SFX.click(); openDaySummary(lastDayRec, lastDayMonthly); },
+  backToSummary(){ SFX.click(); if(lastDayRec) openDaySummary(lastDayRec, lastDayMonthly); else closePanel(); },
   milestoneNext(){ SFX.click(); openDaySummary(lastDayRec, lastDayMonthly); },
   ownerNext(){
     stopBgm(); SFX.click();
