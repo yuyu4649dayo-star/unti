@@ -21,6 +21,7 @@ canvas{display:block;touch-action:none}
 .iconbtn{position:fixed;top:10px;width:40px;height:40px;border-radius:50%;background:#000a;border:1px solid #ffffff44;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:10;cursor:pointer;touch-action:none}
 #mailBtn{right:60px}
 #mute{right:12px}
+#achBtn{right:108px}
 #panel{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:5}
 #pbox{background:#1a1f35;border:1px solid #2c3558;border-radius:14px;padding:20px;max-width:580px;width:100%;max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;line-height:1.7}
 #pwrap{position:relative;max-width:580px;width:100%}
@@ -30,6 +31,7 @@ canvas{display:block;touch-action:none}
 .btn:hover{border-color:#6c8cff}
 .btn.on{border-color:#3ddc97}
 .btn.primary{background:#6c8cff;text-align:center;font-weight:bold;border:none}
+.inp{width:100%;padding:10px;border-radius:8px;border:1px solid #2c3558;background:#0c1020;color:#fff;margin:4px 0;font-size:16px;box-sizing:border-box;font-family:inherit}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .ok{color:#3ddc97}.ng{color:#ff6b6b}.gold{color:#ffd166}.muted{color:#8a93b8;font-size:12px}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000d;z-index:9}
@@ -51,6 +53,7 @@ canvas{display:block;touch-action:none}
 <body>
 <div id="hud"><div id="obj"></div><div id="total" style="font-size:14px;color:#ffd166;margin-top:4px;font-weight:bold"></div><div id="stat"></div><div id="target" style="font-size:14px;color:#7fe3ff;margin-top:4px;font-weight:bold"></div></div>
 <div id="mailBtn" class="iconbtn">📩</div>
+<div id="achBtn" class="iconbtn">🏆</div>
 <div id="mute" class="iconbtn">🔊</div>
 <div id="tut"><div class="txt"><span class="tag"></span><span class="body"></span></div><button id="tutSkip">スキップ</button></div>
 <div id="crosshair"></div>
@@ -66,11 +69,20 @@ canvas{display:block;touch-action:none}
   <b>🔧 自作PC工房</b><br>
   あなたは小さな自作PC工房の店主。<br>
   <span id="startText"></span><br><br>
+  <div id="authBox" style="text-align:left;margin:8px 0">
+    <input class="inp" id="authEmail" type="email" placeholder="メールアドレス" autocomplete="username">
+    <input class="inp" id="authPw" type="password" placeholder="パスワード（6文字以上）" autocomplete="current-password">
+    <div style="display:flex;gap:8px"><button class="btn" id="authIn" style="flex:1">ログイン</button><button class="btn" id="authUp" style="flex:1">新規登録</button><button class="btn" id="authOut" style="flex:1;display:none">ログアウト</button></div>
+    <div id="authStatus" class="muted" style="font-size:13px"></div>
+  </div>
   <button class="btn primary" id="tutYes">チュートリアルを見て始める</button>
   <button class="btn" id="tutNo">チュートリアルなしで始める</button>
 </div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-firestore-compat.js"></script>
 <script>
 // ===== 端末判定 =====
 const isTouch = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
@@ -120,6 +132,7 @@ function noise({dur=0.1, vol=0.2, delay=0, hp=null, bp=null}){
   src.start(t);
 }
 const SFX = {
+  bell(){ tone({f:1568,dur:0.7,type:'triangle',vol:0.28}); tone({f:2093,dur:0.7,type:'triangle',vol:0.22,delay:0.08}); },
   click(){ tone({f:900, dur:0.04, type:'square', vol:0.06}); },
   open(){ tone({f:520, f2:780, dur:0.1, type:'triangle', vol:0.12}); },
   pickup(){ tone({f:330, f2:520, dur:0.12, type:'triangle', vol:0.15}); noise({dur:0.05, vol:0.06, hp:1200}); },
@@ -298,6 +311,26 @@ const PARTS = {
     {id:'m8', name:'X670 ATX', socket:'AM5', ram:'DDR5', ff:'ATX', price:32000},
     {id:'m9', name:'H610 mATX（DDR4）', socket:'LGA1700', ram:'DDR4', ff:'mATX', price:8000},
     {id:'m10', name:'Z890 ATX', socket:'LGA1851', ram:'DDR5', ff:'ATX', price:45000},
+    {id:'m11', name:'X870 ATX', socket:'AM5', ram:'DDR5', ff:'ATX', price:38000},
+    {id:'m12', name:'X870E ATX', socket:'AM5', ram:'DDR5', ff:'ATX', price:60000},
+    {id:'m13', name:'B850 ATX', socket:'AM5', ram:'DDR5', ff:'ATX', price:26000},
+    {id:'m14', name:'B840 mATX', socket:'AM5', ram:'DDR5', ff:'mATX', price:19000},
+    {id:'m15', name:'B650I Mini-ITX', socket:'AM5', ram:'DDR5', ff:'ITX', price:22000},
+    {id:'m16', name:'Z690 ATX（DDR5）', socket:'LGA1700', ram:'DDR5', ff:'ATX', price:28000},
+    {id:'m17', name:'Z690 ATX（DDR4）', socket:'LGA1700', ram:'DDR4', ff:'ATX', price:26000},
+    {id:'m18', name:'B660 mATX（DDR4）', socket:'LGA1700', ram:'DDR4', ff:'mATX', price:14000},
+    {id:'m19', name:'H770 ATX（DDR5）', socket:'LGA1700', ram:'DDR5', ff:'ATX', price:18000},
+    {id:'m20', name:'Z790 Mini-ITX', socket:'LGA1700', ram:'DDR5', ff:'ITX', price:42000},
+    {id:'m21', name:'B760 Mini-ITX', socket:'LGA1700', ram:'DDR5', ff:'ITX', price:24000},
+    {id:'m22', name:'B860 ATX', socket:'LGA1851', ram:'DDR5', ff:'ATX', price:26000},
+    {id:'m23', name:'B860 mATX', socket:'LGA1851', ram:'DDR5', ff:'mATX', price:21000},
+    {id:'m24', name:'Z890 Mini-ITX', socket:'LGA1851', ram:'DDR5', ff:'ITX', price:65000},
+    {id:'m25', name:'X570 ATX（DDR4）', socket:'AM4', ram:'DDR4', ff:'ATX', price:26000},
+    {id:'m26', name:'B450 mATX（DDR4）', socket:'AM4', ram:'DDR4', ff:'mATX', price:9000},
+    {id:'m27', name:'A520 mATX（DDR4）', socket:'AM4', ram:'DDR4', ff:'mATX', price:7500},
+    {id:'m28', name:'B450 ATX（DDR4）', socket:'AM4', ram:'DDR4', ff:'ATX', price:11000},
+    {id:'m29', name:'B550 Mini-ITX', socket:'AM4', ram:'DDR4', ff:'ITX', price:16000},
+    {id:'m30', name:'X570 Mini-ITX', socket:'AM4', ram:'DDR4', ff:'ITX', price:28000},
   ],
   ram: [
     {id:'r1', name:'DDR5-5600 16GB（8GB×2）', type:'DDR5', price:29000},
@@ -319,6 +352,16 @@ const PARTS = {
     {id:'r17', name:'DDR4-2400 16GB（8GB×2）', type:'DDR4', price:17000},
     {id:'r18', name:'DDR4-2666 16GB（8GB×2）', type:'DDR4', price:17000},
     {id:'r19', name:'DDR4-2933 16GB（8GB×2）', type:'DDR4', price:16500},
+    {id:'r20', name:'DDR5-6000 32GB（16GB×2）', type:'DDR5', price:62000},
+    {id:'r21', name:'DDR5-6400 32GB（16GB×2）', type:'DDR5', price:60000},
+    {id:'r22', name:'DDR5-6000 32GB RGB（16GB×2）', type:'DDR5', price:72000},
+    {id:'r23', name:'DDR5-6000 16GB RGB（8GB×2）', type:'DDR5', price:36000},
+    {id:'r24', name:'DDR5-5600 64GB（32GB×2）', type:'DDR5', price:125000},
+    {id:'r25', name:'DDR5-6000 48GB（24GB×2）', type:'DDR5', price:90000},
+    {id:'r26', name:'DDR4-3600 32GB（16GB×2）', type:'DDR4', price:36000},
+    {id:'r27', name:'DDR4-3200 32GB 低背（16GB×2）', type:'DDR4', price:32000},
+    {id:'r28', name:'DDR4-3200 32GB RGB（16GB×2）', type:'DDR4', price:36000},
+    {id:'r29', name:'DDR4-3200 64GB（32GB×2）', type:'DDR4', price:70000},
   ],
   gpu: [
     {id:'g1', name:'RTX 4060', price:45000, perf:55, len:240, tdp:115},
@@ -337,11 +380,11 @@ const PARTS = {
     {id:'p5', name:'750W 80+ Bronze', watt:750, price:9000},
   ],
   case: [
-    {id:'k1', name:'ミニケース', ff:['mATX'], maxGpu:250, price:7000},
-    {id:'k2', name:'ミドルタワー', ff:['mATX','ATX'], maxGpu:340, price:12000},
-    {id:'k3', name:'フルタワー', ff:['mATX','ATX'], maxGpu:400, price:20000},
-    {id:'k4', name:'ガラスミドル', ff:['mATX','ATX'], maxGpu:360, price:15000},
-    {id:'k5', name:'スリムミニ', ff:['mATX'], maxGpu:280, price:9000},
+    {id:'k1', name:'ミニケース', ff:['ITX','mATX'], maxGpu:250, price:7000},
+    {id:'k2', name:'ミドルタワー', ff:['ITX','mATX','ATX'], maxGpu:340, price:12000},
+    {id:'k3', name:'フルタワー', ff:['ITX','mATX','ATX'], maxGpu:400, price:20000},
+    {id:'k4', name:'ガラスミドル', ff:['ITX','mATX','ATX'], maxGpu:360, price:15000},
+    {id:'k5', name:'スリムミニ', ff:['ITX','mATX'], maxGpu:280, price:9000},
   ],
   cooler: [
     {id:'h1', name:'付属クーラー', sockets:['AM4','AM5','LGA1700','LGA1851'], maxTdp:65, price:0},
@@ -356,6 +399,15 @@ const PARTS = {
     {id:'s3', name:'4TB NVMe SSD', price:26000},
     {id:'s4', name:'512GB NVMe SSD', price:5000},
     {id:'s5', name:'1TB 高速NVMe SSD（PCIe 5.0）', price:19000},
+    {id:'s6', name:'256GB NVMe SSD', price:3500},
+    {id:'s7', name:'1TB NVMe SSD（ヒートシンク付き）', price:11000},
+    {id:'s8', name:'2TB NVMe SSD（ヒートシンク付き）', price:17000},
+    {id:'s9', name:'1TB PCIe 4.0 SSD（DRAMなし）', price:6500},
+    {id:'s10', name:'2TB PCIe 4.0 SSD', price:16000},
+    {id:'s11', name:'4TB PCIe 4.0 SSD', price:30000},
+    {id:'s12', name:'2TB PCIe 5.0 SSD（ヒートシンク付き）', price:33000},
+    {id:'s13', name:'8TB NVMe（サーバー向け）', price:60000},
+    {id:'s14', name:'1TB 耐久NVMe（TLC）', price:12000},
   ],
   hdd: [
     {id:'d1', name:'HDD 1TB（3.5インチ）', price:5000},
@@ -409,9 +461,19 @@ const ORDER_POOL = [
   {client:'うさん', job:'保育士', letter:'保育園の書類と写真整理に使います。ふつうの値段で、簡単に使えるものを。', budget:90000, minPerf:33},
   {client:'えさん', job:'カフェ店主', letter:'レジとは別に在庫の集計をします。古いソフトが動けば大丈夫です。', budget:100000, minPerf:35},
   {client:'おさん', job:'ゲーム開発者（インディー）', letter:'Unityでゲームを作ります。ビルドが速いと助かります。', budget:250000, minPerf:74},
+  {client:'かさん', job:'陶芸家（ブログ用）', letter:'作品写真の編集と、ブログ更新が中心です。', budget:95000, minPerf:34},
+  {client:'きさん', job:'歯科助手', letter:'予約システムを使います。古くてもいいので安定重視で。', budget:100000, minPerf:36},
+  {client:'くさん', job:'大学教授', letter:'論文の執筆と学会の資料作成です。長時間使っても熱くならないものを。', budget:150000, minPerf:50},
+  {client:'けさん', job:'配管工', letter:'見積もりを作るだけなので、安いものでいいです。', budget:85000, minPerf:30},
+  {client:'こさん', job:'声優志望', letter:'収録の編集ソフトを使います。ノイズに弱いので静かなPCがいいです。', budget:140000, minPerf:48},
+  {client:'すさん', job:'就活中の学生', letter:'就職活動の書類作成に使います。予算は本当にギリギリです。', budget:80000, minPerf:30},
+  {client:'せさん', job:'VTuber', letter:'Live2Dとゲーム配信。両方こなせるPCにしてください。', budget:270000, minPerf:76},
+  {client:'そさん', job:'鉄道模型ファン', letter:'Blenderで線路の3Dモデルを作ります。', budget:200000, minPerf:62},
+  {client:'たさん', job:'旅行ブロガー', letter:'写真の現像と動画編集です。ノートPCでは限界なので買い替えたい。', budget:120000, minPerf:44},
+  {client:'ちさん', job:'天文学アマチュア', letter:'天体写真の画像処理を一晩中やります。熱と騒音が少ないことが条件です。', budget:190000, minPerf:60},
 ];
 function shuffledOrders(){ return [...ORDER_POOL].sort(() => Math.random() - 0.5).slice(0, 10); }
-let ORDERS = shuffledOrders();
+let ORDERS = [];
 const STEPS = [
   {key:'mb', label:'マザーボード'}, {key:'cpu', label:'CPU'}, {key:'cooler', label:'CPUクーラー'},
   {key:'ram', label:'メモリ'}, {key:'storage', label:'SSD（M.2）'}, {key:'gpu', label:'グラフィックボード'},
@@ -439,7 +501,7 @@ const TUT = [
   {text:()=>'そろったら、奥の机の前で「組み立ての準備を確認」を押そう。OKなら組み立てを始められます。', done:()=>S.phase === 'build'},
   {text:()=>`パーツ台の部品に近づいて、${K_ACT}で持とう。`, done:()=>!!held},
   {text:()=>`組み立て台の前で${K_ACT}を押すと、部品を取り付けられます。`, done:()=>S.screwing},
-  {text:()=>`ネジを${K_ACT}を押し続けて締めよう（ネジの本数はパーツごとに違う）。`, done:()=>S.step >= 1},
+  {text:()=>`ネジを${K_ACT}を連打して締めよう（ネジの本数はパーツごとに違う）。`, done:()=>S.step >= 1},
   {text:()=>'残りの部品も、手順どおりに取り付けよう。', done:()=>S.phase !== 'build'},
   {text:()=>`組み立て台の電源ボタンに近づいて、${K_ACT}で押そう。`, done:()=>S.phase === 'pack' || S.phase === 'ship' || S.phase === 'result'},
   {text:()=>'本体を持ち上げ、梱包台へ運ぼう。箱は奥のダンボールの山で選べる。', done:()=>S.phase === 'ship' || S.phase === 'result'},
@@ -475,7 +537,7 @@ document.getElementById('tutSkip').addEventListener('pointerdown', e => { e.prev
 function newState(){
   return {orderIdx:0, money:0, rep:0, phase:'order', cart:{}, damage:0,
     step:0, screws:0, screwing:false, packMiss:0, packDone:[], box:null, ship:null,
-    testFail:0, shock:false, result:null, steps:[]};
+    testFail:0, shock:false, result:null, steps:[], done:0, day:1};
 }
 let S = newState();
 const get = k => PARTS[k].find(p => p.id === S.cart[k]) || null;
@@ -495,7 +557,7 @@ function reqMissing(){
 const caseSize = () => { const c = get('case'); return c ? CASESIZE[c.name] : 0; };
 
 function checks(){
-  const o = ORDERS[S.orderIdx];
+  const o = curO();
   const p = {}; CAT.forEach(c => p[c.key] = get(c.key));
   const L = []; const add = (hw, ok, text) => L.push({hw, ok, text});
   const miss = reqMissing();
@@ -552,80 +614,115 @@ function label(text){
 // ===== パーツの見た目（実物に近いモデル） =====
 function partModel(k){
   const p = get(k) || {name:''};
+  const nm = p.name || '';
   const g = new THREE.Group();
-  const B = (w,h,d,c,x=0,y=0,z=0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat(c)); m.position.set(x,y,z); g.add(m); return m; };
-  const C = (r,h,c,x=0,y=0,z=0,facingZ=false) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,20), mat(c)); m.position.set(x,y,z); if(facingZ) m.rotation.x = Math.PI/2; g.add(m); return m; };
+  const add = m => { g.add(m); return m; };
+  const glow = c => new THREE.MeshBasicMaterial({color:c});
+  const B = (w,h,d,c,x=0,y=0,z=0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat(c)); m.position.set(x,y,z); return add(m); };
+  const C = (r,h,c,x=0,y=0,z=0,facingZ=false,seg=24) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,seg), mat(c)); m.position.set(x,y,z); if(facingZ) m.rotation.x = Math.PI/2; return add(m); };
+  const T = (r,t,c,x=0,y=0,z=0) => { const m = new THREE.Mesh(new THREE.TorusGeometry(r,t,8,32), mat(c)); m.position.set(x,y,z); return add(m); };
+  const LED = (w,h,d,c,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), glow(c)); m.position.set(x,y,z); return add(m); };
   switch(k){
     case 'mb': {
-      B(0.4,0.015,0.36,0x1f6b35);                       // 基板（緑）
-      B(0.1,0.01,0.1,0x111111,-0.05,0.012,-0.04);       // CPUソケット
-      B(0.08,0.03,0.12,0x8a8e96,-0.13,0.02,-0.04);      // VRMヒートシンク
-      for(let i=0;i<4;i++) B(0.012,0.025,0.14,0x111111,0.1+i*0.02,0.012,0); // メモリスロット
-      B(0.28,0.012,0.014,0x111111,0,0.012,-0.14);       // PCIeスロット
-      B(0.06,0.01,0.014,0x2a2a2a,-0.1,0.012,0.14);      // M.2スロット
-      B(0.05,0.012,0.05,0x7d8087,0.1,0.014,0.1);        // チップセットヒートシンク
-      C(0.01,0.01,0xc9a227,0.15,0.01,-0.1);             // 電解コンデンサ
+      const pcb = /白|ホワイト/.test(nm) ? 0xd9dee5 : /ITX/.test(nm) ? 0x262a31 : 0x1d2a22;
+      B(0.4,0.015,0.36,pcb,0,0.0075,0);                       // 基板
+      B(0.1,0.01,0.1,0x0d0d10,-0.05,0.012,-0.04);             // CPUソケット
+      B(0.09,0.034,0.13,0x7d838c,-0.13,0.02,-0.04);           // VRMヒートシンク
+      for(let i=0;i<6;i++) B(0.094,0.036,0.005,0x59606a,-0.13,0.02,-0.1+i*0.024); // フィン
+      for(let i=0;i<4;i++) B(0.012,0.025,0.14, i%2===0 ? 0xf2f2f2 : 0x1a1a1a, 0.1+i*0.02,0.012,0); // メモリスロット
+      B(0.28,0.012,0.014,0x111111,0,0.012,-0.14);             // PCIe x16
+      B(0.1,0.01,0.012,0x111111,-0.09,0.012,-0.2);            // PCIe x1
+      B(0.06,0.01,0.014,0x2a2a2a,-0.1,0.012,0.14);            // M.2スロット
+      for(let i=0;i<4;i++) B(0.012,0.012,0.02,0x1a1a1a,0.12+i*0.015,0.012,0.16); // SATA
+      B(0.05,0.012,0.05,0x7d8087,0.1,0.014,0.1);              // チップセット
+      for(let i=0;i<4;i++) B(0.052,0.02,0.004,0x9aa0a8,0.1,0.02,0.08+i*0.012);
+      for(let i=0;i<6;i++) C(0.008,0.012,i%2?0xc9a227:0x1a1a1a,0.15+(i%3)*0.02,0.012,-0.12-Math.floor(i/3)*0.02); // コンデンサ
+      B(0.03,0.05,0.14,0xc0c6ce,-0.2,0.035,-0.02);            // I/Oシールド
+      if(/RGB/.test(nm)) LED(0.3,0.002,0.004,0x3dd6ff,0,0.0185,0.17);
       break;
     }
     case 'cpu': {
-      B(0.1,0.006,0.1,0x2a2a2a,0,0.003,0);              // 基板
-      B(0.08,0.008,0.08,0xd0d4da,0,0.01,0);             // IHS（ヒートスプレッダ）
+      B(0.1,0.006,0.1,0x2a2a2a,0,0.003,0);                    // 基板
+      B(0.08,0.008,0.08,0xd0d4da,0,0.01,0);                   // IHS
+      B(0.06,0.0012,0.06,0xb9bec6,0,0.0145,0);                // IHSの研磨面
       break;
     }
     case 'cooler': {
-      C(0.035,0.02,0x9aa0a8,0,0.01,0);                  // ベース
-      for(let i=0;i<8;i++){
-        const a = i*Math.PI/4;
-        const f = B(0.1,0.1,0.01,0xb8bec6, Math.cos(a)*0.05, 0.07, Math.sin(a)*0.05);
+      C(0.035,0.02,0x9aa0a8,0,0.01,0);                        // ベース
+      for(let i=0;i<4;i++){ const a=i*Math.PI/2+0.4; C(0.004,0.12,0xc27d4a,Math.cos(a)*0.02,0.07,Math.sin(a)*0.02); } // ヒートパイプ
+      for(let i=0;i<10;i++){
+        const a = i*2*Math.PI/10;
+        const f = B(0.1,0.1,0.008,0xc5ccd5, Math.cos(a)*0.05, 0.075, Math.sin(a)*0.05);
         f.rotation.y = -a;
       }
-      C(0.055,0.02,0x2c2f36,0,0.14,0);                  // ファン（上部）
+      C(0.058,0.02,0x2c2f36,0,0.14,0);                        // ファン
+      for(let i=0;i<7;i++){ const a=i*2*Math.PI/7; const bl=B(0.04,0.004,0.01,0x3a3f48,Math.cos(a)*0.03,0.152,Math.sin(a)*0.03); bl.rotation.y=-a; }
+      if(/RGB/.test(nm)) T(0.058,0.002,0x3dd6ff,0,0.15,0).rotation.x = Math.PI/2;
       break;
     }
     case 'ram': {
-      const heat = p.type === 'DDR5' ? 0xd0d4da : 0x1a1a1a;
+      const heat = /RGB/.test(nm) ? 0x202630 : p.type === 'DDR5' ? 0xc9ced6 : 0x151515;
       for(let i=0;i<2;i++){
         const x = i*0.02;
-        B(0.012,0.1,0.14,0x101418,x,0.05,0);            // 基板
-        B(0.016,0.1,0.13,heat,x,0.06,0);                // ヒートスプレッダ
+        B(0.012,0.1,0.14,0x0e1116,x,0.05,0);                  // 基板
+        B(0.016,0.1,0.13,heat,x,0.06,0);                      // ヒートスプレッダ
+        for(let j=0;j<4;j++) B(0.017,0.004,0.13,0x2a2f38,x,0.02+j*0.024,0);  // 放熱フィン
+        B(0.012,0.012,0.13,0xd4a017,x,0.006,0);               // 金端子
       }
+      if(/RGB/.test(nm)) LED(0.036,0.004,0.12,0x3dd6ff,0.01,0.112,0);
       break;
     }
     case 'gpu': {
-      const acc = /RX/.test(p.name) ? 0xed1c24 : 0x76b900;
-      B(0.3,0.12,0.04,0x1b1b1f,0,0.06,0);               // クーラー部
-      B(0.3,0.12,0.005,0x333333,0,0.06,-0.022);         // バックプレート
-      B(0.3,0.006,0.042,acc,0,0.003,0);                 // アクセントライン
-      C(0.045,0.01,0x111111,-0.075,0.06,0.022,true);    // ファン
-      C(0.045,0.01,0x111111,0.075,0.06,0.022,true);
+      const acc = /RX/.test(nm) ? 0xed1c24 : 0x76b900;
+      const shroud = /白|ホワイト/.test(nm) ? 0xe6e9ee : 0x1b1b1f;
+      B(0.3,0.12,0.04,shroud,0,0.06,0);                       // クーラー部
+      B(0.3,0.12,0.005,0x333333,0,0.06,-0.022);               // バックプレート
+      [-0.075,0.075].forEach(fx => {
+        C(0.045,0.01,0x0c0c10,fx,0.06,0.022,true);            // ファン
+        T(0.046,0.004,0x2a2a30,fx,0.06,0.024);                // ファンリング
+        for(let i=0;i<7;i++){ const a=i*2*Math.PI/7; const bl=B(0.04,0.006,0.004,0x25252c,fx+Math.cos(a)*0.02,0.06+Math.sin(a)*0.02,0.03); bl.rotation.z=a; }
+        C(0.012,0.01,0x111111,fx,0.06,0.03,true);             // ハブ
+      });
+      B(0.3,0.006,0.042,acc,0,0.003,0);                       // アクセントライン
+      B(0.005,0.1,0.02,0x9aa0a8,-0.1525,0.06,0);              // ブラケット
+      if(/RGB/.test(nm)) LED(0.28,0.004,0.004,0x3dd6ff,0,0.12,0.022);
       break;
     }
     case 'psu': {
-      B(0.2,0.12,0.2,0x2a2c31,0,0.06,0);                // 本体
-      C(0.07,0.01,0x111111,0,0.06,0.101,true);          // ファングリル
-      B(0.05,0.02,0.01,0xcfd4dc,0.06,0.02,0.102);        // シール
+      const body = /白|ホワイト/.test(nm) ? 0xe6e9ee : 0x2a2c31;
+      B(0.2,0.12,0.2,body,0,0.06,0);                          // 本体
+      C(0.07,0.01,0x111111,0,0.06,0.101,true);                // ファン
+      for(let i=0;i<6;i++){ const bl=B(0.13,0.004,0.006,0x3a3d44,0,0.06,0.106); bl.rotation.z=i*Math.PI/6; }
+      for(let i=0;i<3;i++) B(0.01,0.02,0.03,0x111111,0.101,0.03+i*0.035,0);  // モジュラーポート
+      B(0.05,0.02,0.01,0xcfd4dc,0.06,0.02,0.102);             // ラベル
+      C(0.006,0.06,0x222222,0.12,0.06,-0.05);                 // ケーブル束
+      C(0.006,0.06,0xe03e3e,0.125,0.06,-0.035);
       break;
     }
     case 'storage': {
-      B(0.08,0.008,0.024,0x1b1b1b,0,0.004,0);           // SSD基板
-      B(0.07,0.002,0.02,COLOR.storage,0,0.009,0);       // ラベル
+      const hs = /ヒートシンク/.test(nm);
+      B(0.08,0.008,0.024,0x16181c,0,0.004,0);                 // SSD基板（M.2）
+      B(0.03,0.002,0.02,0x0a0a0a,-0.01,0.009,0);              // NANDチップ
+      B(0.02,0.002,0.02,0x0a0a0a,0.02,0.009,0);               // コントローラ
+      if(hs) B(0.082,0.014,0.028,0x2a2e36,0,0.015,0);         // ヒートシンク
+      B(0.07,0.002,0.02,COLOR.storage,0,hs ? 0.023 : 0.009,0); // ラベル
       break;
     }
     case 'hdd': {
-      B(0.15,0.04,0.1,0x3a3f48,0,0.02,0);               // 本体
-      B(0.148,0.002,0.098,0x9aa0a8,0,0.041,0);          // 天板
-      B(0.03,0.008,0.02,0xc0c0c0,0.06,0.02,0.05);       // SATAコネクタ
+      B(0.15,0.04,0.1,0x3a3f48,0,0.02,0);                     // 本体
+      B(0.148,0.002,0.098,0x9aa0a8,0,0.041,0);                // 天板
+      B(0.1,0.0015,0.06,0xe9e4d0,-0.01,0.0425,0);             // ラベル
+      B(0.03,0.008,0.02,0xc0c0c0,0.06,0.02,0.05);             // SATAコネクタ
+      for(let i=0;i<4;i++) B(0.02,0.004,0.02,0x111111,(i%2?0.06:-0.06),0.002,(i<2?0.035:-0.035)); // ゴム足
       break;
     }
     case 'fan': {
-      B(0.12,0.12,0.025,0x161616,0,0,0);                // フレーム
-      C(0.052,0.005,0x2b2b33,0,0,0.013,true);           // ファン面
-      C(0.012,0.012,0x0a0a0a,0,0,0.02,true);            // ハブ
-      for(let i=0;i<7;i++){
-        const a = i*2*Math.PI/7;
-        const bl = B(0.04,0.008,0.004,0x3a3f48, Math.cos(a)*0.025, Math.sin(a)*0.025, 0.017);
-        bl.rotation.z = a;
-      }
+      B(0.12,0.12,0.025,0x161616,0,0,0);                      // フレーム
+      C(0.052,0.005,0x23262e,0,0,0.013,true);                 // ファン面
+      T(0.056,0.004,0x0d0d10,0,0,0.0145);                     // リング
+      for(let i=0;i<9;i++){ const a=i*2*Math.PI/9; const bl=B(0.045,0.006,0.004,0x3a3f48,Math.cos(a)*0.027,Math.sin(a)*0.027,0.018); bl.rotation.z=a+0.3; }
+      C(0.014,0.012,0x0a0a0a,0,0,0.022,true);                 // ハブ
+      if(/RGB/.test(nm)){ const r = new THREE.Mesh(new THREE.TorusGeometry(0.05,0.003,8,32), glow(0x3dd6ff)); r.position.z = 0.0165; add(r); }
       break;
     }
   }
@@ -697,11 +794,81 @@ function drawShelfLabel(key){
 }
 function refreshShelves(){ CAT.forEach(c => drawShelfLabel(c.key)); }
 // 床と壁
-addBox(24,0.1,24,0x3a3d4d,0,-0.05,0);
-addBox(24,4,0.2,0x2a2f44,0,2,-12);
-addBox(24,4,0.2,0x2a2f44,0,2,12);
-addBox(0.2,4,24,0x2a2f44,-12,2,0);
-addBox(0.2,4,24,0x2a2f44,12,2,0);
+// 床（タイル）
+const tileC = document.createElement('canvas'); tileC.width = 256; tileC.height = 256;
+{ const g = tileC.getContext('2d');
+  for(let i=0;i<2;i++) for(let j=0;j<2;j++){ g.fillStyle = (i+j)%2 ? '#5b6070' : '#4d5365'; g.fillRect(i*128,j*128,128,128); }
+  g.strokeStyle = '#3a3f4d'; g.lineWidth = 3; g.strokeRect(0,0,256,256); }
+const floorTex = new THREE.CanvasTexture(tileC);
+floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(12,12);
+{ const fl = new THREE.Mesh(new THREE.BoxGeometry(24,0.1,24), new THREE.MeshLambertMaterial({map: floorTex})); fl.position.set(0,-0.05,0); scene.add(fl); }
+// 壁（クロス＋腰板）
+const wallC = document.createElement('canvas'); wallC.width = 256; wallC.height = 256;
+{ const g = wallC.getContext('2d'); g.fillStyle = '#2e3550'; g.fillRect(0,0,256,256);
+  for(let x=0;x<256;x+=32){ g.fillStyle = 'rgba(255,255,255,0.03)'; g.fillRect(x,0,16,256); }
+  g.fillStyle = '#6a4a30'; g.fillRect(0,196,256,60); g.fillStyle = '#3d2a1c'; g.fillRect(0,192,256,6); }
+const wallTex = new THREE.CanvasTexture(wallC);
+wallTex.wrapS = wallTex.wrapT = THREE.RepeatWrapping; wallTex.repeat.set(4,1);
+const wallMat = new THREE.MeshLambertMaterial({map: wallTex});
+function wallBox(w,h,d,x,y,z){ const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), wallMat); m.position.set(x,y,z); scene.add(m); return m; }
+// 天井と照明
+addBox(24,0.04,24,0x1d2030,0,4,0);
+{ const lampMat = new THREE.MeshBasicMaterial({color:0xfff3d6});
+  [-6,0,6].forEach(x => [-6,0,6].forEach(z => { const l = new THREE.Mesh(new THREE.BoxGeometry(1.4,0.03,0.5), lampMat); l.position.set(x,3.96,z); scene.add(l); })); }
+// 奥の窓（空）
+{ const sc = document.createElement('canvas'); sc.width = 256; sc.height = 128; const g = sc.getContext('2d');
+  const gr = g.createLinearGradient(0,0,0,128); gr.addColorStop(0,'#6fbfff'); gr.addColorStop(1,'#e3f5ff'); g.fillStyle = gr; g.fillRect(0,0,256,128);
+  g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillRect(40,30,50,14); g.fillRect(150,60,70,16);
+  const win = new THREE.Mesh(new THREE.PlaneGeometry(6,2), new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(sc)}));
+  win.position.set(6,2.3,-11.85); scene.add(win);
+  addBox(6.2,0.08,0.06,0x5b6070,6,3.36,-11.82); addBox(6.2,0.08,0.06,0x5b6070,6,1.26,-11.82);
+  addBox(0.08,2.2,0.06,0x5b6070,2.96,2.3,-11.82); addBox(0.08,2.2,0.06,0x5b6070,9.04,2.3,-11.82);
+  addBox(0.06,2.2,0.04,0x5b6070,6,2.3,-11.82); }
+// 右の壁のポスター
+[-6,-2].forEach((z,i) => {
+  const pc = document.createElement('canvas'); pc.width = 128; pc.height = 180; const g = pc.getContext('2d');
+  g.fillStyle = ['#f4efe2','#d9ecf7'][i]; g.fillRect(0,0,128,180); g.fillStyle = ['#d9534f','#2fbf7f'][i]; g.fillRect(0,0,128,40);
+  g.fillStyle = '#222'; g.font = 'bold 16px sans-serif'; g.textAlign = 'center'; g.fillText(['本日の','自作PC'][i], 64, 26);
+  g.font = '14px sans-serif'; g.fillText(['おすすめ','工房'][i], 64, 80); g.fillText(['パーツ入荷','修理受付中'][i], 64, 110);
+  const pm = new THREE.Mesh(new THREE.PlaneGeometry(1.0,1.4), new THREE.MeshLambertMaterial({map: new THREE.CanvasTexture(pc)}));
+  pm.position.set(11.85, 2.1, z); pm.rotation.y = -Math.PI/2; scene.add(pm);
+});
+// 観葉植物（奥の角）：鉢・土・葉を組んだ株
+function makePlant(x, z){
+  const pg = new THREE.Group();
+  const add = m => { pg.add(m); return m; };
+  add(new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.19,0.42,20), mat(0xb2643a))).position.y = 0.21;
+  add(new THREE.Mesh(new THREE.CylinderGeometry(0.29,0.27,0.07,20), mat(0xc9733f))).position.y = 0.43;
+  add(new THREE.Mesh(new THREE.CylinderGeometry(0.245,0.245,0.02,20), mat(0x3a2a1c))).position.y = 0.44;
+  const greens = [0x2f8a4a,0x3fa35a,0x256e3a,0x58b86b,0x2b7d46,0x6cc47a];
+  let seed = 11; const rnd = () => (seed = (seed*9301 + 49297) % 233280) / 233280;
+  for(let i=0;i<9;i++){
+    const a = rnd()*Math.PI*2, r = 0.05 + rnd()*0.18, h = 0.5 + rnd()*0.35;
+    const stem = add(new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,h,6), mat(0x4b3a24)));
+    stem.position.set(Math.cos(a)*r*0.5, 0.44 + h/2, Math.sin(a)*r*0.5);
+    stem.rotation.set(Math.sin(a)*0.35, 0, -Math.cos(a)*0.35);
+  }
+  for(let i=0;i<22;i++){
+    const a = rnd()*Math.PI*2, r = 0.08 + rnd()*0.28, y = 0.75 + rnd()*0.5;
+    const leaf = add(new THREE.Mesh(new THREE.SphereGeometry(0.14,10,8), mat(greens[Math.floor(rnd()*greens.length)])));
+    leaf.position.set(Math.cos(a)*r, y, Math.sin(a)*r);
+    leaf.scale.set(1.0, 0.3, 0.55);
+    leaf.rotation.set(0.3*Math.sin(a), -a, 0.4*Math.cos(a));
+  }
+  pg.position.set(x, 0, z);
+  return pg;
+}
+scene.add(makePlant(-11, -10.5));
+// 入口（手前の壁）と出口（右の壁）
+addBox(1.6,0.08,0.12,0x5b6070,-2,2.3,11.8); addBox(0.08,2.3,0.12,0x5b6070,-2.8,1.15,11.8); addBox(0.08,2.3,0.12,0x5b6070,-1.2,1.15,11.8);
+addBox(1.5,2.2,0.04,0x9fd8ff,-2,1.1,11.8);
+addBox(0.12,0.08,1.6,0x5b6070,11.8,2.3,9.5); addBox(0.12,2.3,0.08,0x5b6070,11.8,1.15,8.7); addBox(0.12,2.3,0.08,0x5b6070,11.8,1.15,10.3);
+addBox(0.04,2.2,1.5,0x9fe8b0,11.84,1.1,9.5);
+
+wallBox(24,4,0.2,0,2,-12);
+wallBox(24,4,0.2,0,2,12);
+wallBox(0.2,4,24,-12,2,0);
+wallBox(0.2,4,24,12,2,0);
 
 function table(x,z,w,d){
   const h = 0.9;
@@ -720,10 +887,12 @@ table(2,0,2.6,1.2);        // 組み立て台
 table(5,3,2.4,1.2);        // 梱包台
 table(7,-4,1.6,1.6);      // ダンボールの山
 table(8,5,2.0,1.0);       // 配送カウンター
+table(0,8,2.2,0.8);        // レジ
+{ const reg = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.25,0.35), mat(0x2d3138)); reg.position.set(0.4,1.07,8); scene.add(reg); const scr = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.2,0.02), mat(0x3dd6ff)); scr.position.set(0.4,1.25,7.83); scr.rotation.x = -0.35; scene.add(scr); }
 addBox(0.6,0.5,0.6,0xc89b5b,7,1.15,-4);
 addBox(0.6,0.5,0.6,0xc89b5b,7,1.15,-3.4);
 // 各作業台の看板
-[[-3,-6,'注文・組み立ての準備'],[-4,0,'部品台（ここから取る）'],[2,0,'組み立て台'],[5,3,'梱包台'],[7,-4,'ダンボール'],[8,5,'配送カウンター']].forEach(([x,z,t]) => {
+[[0,8.2,'レジ'],[11.4,2.9,'出口'],[-2,2.9,'入口'],[-3,-6,'注文・組み立ての準備'],[-4,0,'部品台（ここから取る）'],[2,0,'組み立て台'],[5,3,'梱包台'],[7,-4,'ダンボール'],[8,5,'配送カウンター']].forEach(([x,z,t]) => {
   const s = label(t); s.position.set(x, 2.3, z); s.scale.set(2.2, 0.55, 1); scene.add(s);
 });
 
@@ -762,7 +931,7 @@ function installMesh(k){
   const m = partModel(k);
   const p = PLACE[k] || [0,0,0];
   m.position.set(p[0], p[1], p[2]);
-  m.userData.inst = true;
+  m.userData.inst = true; m.userData.key = k;
   return m;
 }
 
@@ -786,6 +955,7 @@ function rebuildPartsTable(){
   partGroups = {};
   TRAY.forEach((k,i) => {
     if(!S.cart[k]) return;
+    if(S.repair && (k !== S.repair.key || S.repair.done || S.cart[k] === S.repair.brokenId)) return;
     const g = makePartGroup(k, true);
     g.position.set(-5.7 + (i%5)*0.9, 0.94, -0.5 + Math.floor(i/5)*0.9);
     g.userData.baseY = 0.94;
@@ -848,7 +1018,7 @@ function installHeld(){
   held = null;
   SFX.place();
   S.screwing = true; S.screws = 0; S.screwNeed = NEED[st.key] || 3;
-  say(`${st.label}を差し込んだ。ネジを${S.screwNeed}本締めよう（${K_ACT}を押し続ける）。`);
+  say(`${st.label}を差し込んだ。ネジを${S.screwNeed}本締めよう（${K_ACT}を連打）。`);
 }
 function screw(){
   S.screws++;
@@ -861,6 +1031,7 @@ function screw(){
   if(S.step >= S.steps.length){ S.phase = 'test'; say('全部取り付けた。電源ボタンを押して動作確認しよう。'); }
 }
 function startBuild(){
+  if(S.repair) return say('修理の依頼は組み立てず、故障した部品を交換しよう（組み立て台）。');
   const c = checks();
   if(!c.ready){
     const bad = c.list.find(x => !x.ok);
@@ -916,14 +1087,16 @@ function openShip(){
 }
 function finish(){
   if(!S.ship) return;
-  const sh = SHIP[S.ship], o = ORDERS[S.orderIdx];
+  const sh = SHIP[S.ship], o = curO();
   S.shock = !sh.ins && Math.random() < 0.2;
-  const parts = total();
+  const parts = (o.repair && S.repair) ? ((PARTS[S.repair.key].find(p => p.id === S.cart[S.repair.key]) || {price:0}).price) : total();
   let q = 100 - S.damage*8 - S.packMiss*10 - S.testFail*12 - (S.shock ? 20 : 0);
   q = Math.max(0, q);
   const stars = q>=90 ? 5 : q>=75 ? 4 : q>=55 ? 3 : q>=35 ? 2 : 1;
   const tip = stars * 1000;
-  const profit = o.budget + tip - parts - BOX[S.box].cost - sh.cost;
+  const late = o.repair ? (S.day || 1) - (o.repair.deadline || 0) : 0;
+  const budgetEff = o.repair ? Math.round(o.budget * (late <= 0 ? 1.3 : Math.max(0.3, 1 - 0.2*late))) : o.budget;
+  const profit = budgetEff + tip - parts - BOX[S.box].cost - sh.cost;
   S.money += profit; S.rep += stars;
   S.result = {q, stars, tip, parts, box:BOX[S.box].cost, ship:sh.cost, profit};
   S.phase = 'result';
@@ -933,11 +1106,15 @@ function finish(){
   const msg = stars>=4 ? '届いた！想像以上にきれいな仕上がりで感動しました。また頼みます！'
             : stars>=3 ? '届きました。ちゃんと動いてるし、まあ合格かな。'
             : '届きましたけど…いろいろ気になる点があります。次は気をつけてください。';
+  S.done = (S.done || 0) + 1;
+  const got = ACH.filter(a => !SAVE.ach.includes(a.id) && a.ok(S, S.result));
+  got.forEach(a => SAVE.ach.push(a.id));
+  persist();
   openPanel(`<h3>${o.client}（${o.job}）からの返信</h3><p>「${msg}」</p>
     ${S.shock ? '<p class="ng">配送中に箱が傾いたらしく、中で何かが当たる音がしたという…</p>' : ''}
     <div style="font-size:24px;color:#ffd166;letter-spacing:2px;text-align:center">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
     <table style="width:100%;font-size:14px">
-      <tr><td>売上（予算）</td><td style="text-align:right">${yen(o.budget)}</td></tr>
+      <tr><td>売上（予算）</td><td style="text-align:right">${yen(budgetEff)}</td></tr>
       <tr><td>部品代</td><td style="text-align:right">−${yen(parts)}</td></tr>
       <tr><td>箱代</td><td style="text-align:right">−${yen(BOX[S.box].cost)}</td></tr>
       <tr><td>送料</td><td style="text-align:right">−${yen(sh.cost)}</td></tr>
@@ -945,12 +1122,14 @@ function finish(){
       <tr><td><b>利益</b></td><td style="text-align:right"><b class="${profit>=0?'ok':'ng'}">${yen(profit)}</b></td></tr>
     </table>
     <p class="muted">品質スコア ${q}（損傷・梱包ミス・動作テスト・配送の結果で決まる）</p>
-    <button class="btn primary" data-act="nextOrder">${S.orderIdx < ORDERS.length-1 ? '次の注文へ' : '全注文の結果を見る'}</button>`, false);
+    ${o.repair ? `<p class="muted">修理の期限：${o.repair.deadline}日目まで。${late <= 0 ? '期限内に直したので報酬 +30%' : `期限を${late}日過ぎたので報酬を減額`}</p>` : ''}
+    ${got.map(a => `<div class="ok">🏆 実績解除：${a.name}（${a.desc}）</div>`).join('')}
+    <button class="btn primary" data-act="nextOrder">次の任務を選ぶ</button>`, false);
 }
 
 // 注文メールの内容（受注前は「受ける」ボタン付き）
 function letterHTML(withAccept){
-  const o = ORDERS[S.orderIdx];
+  const o = curO();
   return `<h3>注文メール（${S.orderIdx+1}件目）</h3>
     <p>差出人：<b>${o.client}</b>（職業：${o.job}）</p>
     <p>「${o.letter}」</p>
@@ -972,7 +1151,7 @@ mailEl.addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio();
 
 function openEnd(){
   SFX.success();
-  const avg = (S.rep / ORDERS.length).toFixed(1);
+  const avg = (S.rep / Math.max(1, S.done || 0)).toFixed(1);
   const rank = avg>=4.5 ? 'SSS：伝説の自作職人' : avg>=3.5 ? 'S：頼れる工房の看板' : avg>=2.5 ? 'A：一人前のビルダー' : 'B：これからの職人';
   openPanel(`<h3>全注文 完了！</h3><p>最終売上 <span class="gold">${yen(S.money)}</span></p>
     <p>平均評価 ${avg} ★　ランク：<b>${rank}</b></p>
@@ -981,14 +1160,20 @@ function openEnd(){
 function openShelf(k){
   SFX.open();
   const c = CAT.find(x => x.key === k);
-  openPanel(`<h3>${c.label}の棚</h3><p class="muted">一つ選ぶと、作業台に運ぶ用のパーツが準備されます。</p><p>選んだパーツの合計：<b class="gold">${yen(total())}</b>　予算：${yen(ORDERS[S.orderIdx].budget)}</p>` +
-    PARTS[k].map(p => `<button class="btn ${S.cart[k]===p.id?'on':''}" data-act="setPart" data-arg="${k}|${p.id}">${S.cart[k]===p.id?'✅ ':''}${p.name}　<span class="gold">${yen(p.price)}</span></button>`).join(''));
+  openPanel(`<h3>${c.label}の棚</h3><p class="muted">一つ選ぶと、作業台に運ぶ用のパーツが準備されます。</p><p>選んだパーツの合計：<b class="gold">${yen(total())}</b>　予算：${yen(curO().budget)}</p>` +
+    PARTS[k].map(p => `<button class="btn ${S.cart[k]===p.id?'on':''}" data-act="setPart" data-arg="${k}|${p.id}">${S.cart[k]===p.id?'✅ ':''}${p.name}　<span class="gold">${yen(p.price)}</span>　在庫 ${stockOf(p.id)}</button>`).join(''));
 }
 
 // ===== インタラクト =====
 function interactables(){
   const L = []; const add = (x,z,r,text,fn) => L.push({x,z,r,text,fn});
   const ph = S.phase;
+  add(11.2, 9.5, 2.0, '出口（帰る）', openExit);
+  if(waitingCust()) add(0, 6.6, 2.4, 'レジ（お客さんに対応）', openRegister);
+  if(S.repair && !S.repair.done && !held && partGroups[S.repair.key] && partGroups[S.repair.key].visible)
+    add(partGroups[S.repair.key].position.x, partGroups[S.repair.key].position.z, 1.1, `${LABEL[S.repair.key]}の代わりを持つ`, () => pickPart(S.repair.key));
+  if(S.repair && !S.repair.done && held && held.type === 'part' && held.key === S.repair.key)
+    add(2, 0, 2.2, `${LABEL[S.repair.key]}を交換する`, repairSwap);
   if(ph === 'shop'){
     CAT.forEach((c,i) => add(-8.6, SHELF_Z0 + i*SHELF_DZ, 2.2, `${c.label}の棚を見る`, () => openShelf(c.key)));
     add(-3, -6, 2.6, '組み立ての準備を確認', showReadiness);
@@ -999,7 +1184,7 @@ function interactables(){
       if(g && g.visible) add(g.position.x, g.position.z, 1.1, `${LABEL[k]}を持つ`, () => pickPart(k));
     });
     if(held && held.type === 'part' && !S.screwing) add(2, 0, 2.2, `${LABEL[held.key]}を取り付ける`, installHeld);
-    if(S.screwing) add(2, 0, 2.2, `ネジを押し続けて締める（${S.screws}/${S.screwNeed}）`, () => {});
+    if(S.screwing) add(2, 0, 2.2, `ネジを締める（${S.screws}/${S.screwNeed}）`, screw);
   }
   if(ph === 'test') add(2, 0, 2.2, '電源ボタンを押す', power);
   if(ph === 'pack'){
@@ -1020,7 +1205,6 @@ function nearest(){
   return best;
 }
 function interact(){
-  if(S.screwing) return;
   const it = nearest();
   if(it) it.fn();
 }
@@ -1067,7 +1251,7 @@ function showReadiness(){
   const miss = reqMissing();
   const rows = c.list.filter(x => x.ok !== undefined).map(x => `<div class="${x.ok?'ok':'ng'}">${x.ok?'✅':'❌'} ${x.text}</div>`).join('');
   openPanel(`<h3>組み立ての準備</h3>
-    <p>選んだパーツの合計：<b class="gold">${yen(total())}</b>　予算：${yen(ORDERS[S.orderIdx].budget)}</p>
+    <p>選んだパーツの合計：<b class="gold">${yen(total())}</b>　予算：${yen(curO().budget)}</p>
     ${miss.length ? `<p class="ng">まだ選んでいない：${miss.join('、')}</p>` : ''}
     ${rows}
     ${c.ready ? '<p class="ok">準備OK！ 組み立てを始められます。</p>' : '<p class="muted">❌の項目を直すと組み立てを始められます。棚でパーツを選び直せます。</p>'}
@@ -1076,7 +1260,7 @@ function showReadiness(){
 // 組み立て中の「次にやること」
 function objBuild(){
   const st = S.steps[S.step];
-  if(S.screwing) return `ネジを締める（${S.screws}/${S.screwNeed}）… ${K_ACT}を押し続ける`;
+  if(S.screwing) return `ネジを締める（${S.screws}/${S.screwNeed}）… ${K_ACT}を連打`;
   if(held && held.type === 'part'){
     if(held.key === st.key) return `「${st.label}」を持っている。組み立て台の前で${K_ACT}で取り付け`;
     return `持っている部品は今の番ではない。${K_DROP}で戻して「${st.label}」を取りに行こう`;
@@ -1086,9 +1270,16 @@ function objBuild(){
 
 const ACT = {
   startBuild(){ if(checks().ready){ closePanel(); startBuild(); } else showReadiness(); },
-  accept(){ S.phase = 'shop'; SFX.click(); closePanel(); say('注文を受けた。左の棚から部品を選ぼう。'); },
+  accept(){ S.phase = 'shop'; SFX.click(); closePanel(); if(curO().repair){ startRepairWorld(); return say('修理を受けた。棚で故障した部品の代わりを選んで、組み立て台で交換しよう。'); } say('注文を受けた。左の棚から部品を選ぼう。'); },
   setPart(arg){
     const [k,id] = arg.split('|');
+    if(S.repair && k !== S.repair.key){ SFX.error(); return say(`この修理で替えるのは「${LABEL[S.repair.key]}」だけ。`); }
+    if(S.repair && id === S.repair.brokenId){ SFX.error(); return say('壊れた部品と同じ物では直せない。'); }
+    if(S.cart[k] === id){ closePanel(); return; }
+    if(stockOf(id) <= 0){ SFX.error(); return say('在庫切れです。少し待つと補充されます。'); }
+    const old = S.cart[k];
+    if(old && !(S.repair && old === S.repair.brokenId)) stockAdd(old, 1);
+    stockAdd(id, -1);
     S.cart[k] = id;
     rebuildPartsTable();
     SFX.click();
@@ -1105,15 +1296,57 @@ const ACT = {
   },
   setShip(arg){ S.ship = arg; SFX.click(); openShip(); },
   shipNow(){ finish(); },
+  sellPart(){
+    const c = REGC; if(!c || c.state !== 'wait') return closePanel();
+    const pid = c.item.part.id;
+    if(stockOf(pid) <= 0){ SFX.error(); return closePanel(); }
+    stockAdd(pid, -1); S.money += c.item.part.price; c.state = 'leave'; REGC = null;
+    const rv = reviewFor(c); S.rep = Math.max(0, S.rep + rv.rep);
+    SFX.cash(); persist(); closePanel(); say(`${c.item.part.name}を販売した（${yen(c.item.part.price)}）。${rv.text}`);
+  },
+  takeRepair(){
+    const c = REGC; if(!c || c.state !== 'wait') return closePanel();
+    const rp = c.repair; rp.dropDay = S.day || 1; rp.deadline = rp.dropDay + rp.wantDays;
+    REPAIR_Q.push(rp); c.state = 'leave'; REGC = null;
+    const rv = reviewFor(c); S.rep = Math.max(0, S.rep + rv.rep);
+    SFX.click(); closePanel(); say(`修理を預かった（${rp.deadline}日目までに返す）。${rv.text}`);
+  },
+  custLeave(){ const c = REGC; if(c) c.state = 'leave'; REGC = null; SFX.click(); closePanel(); },
+  cancelExit(){ SFX.click(); closePanel(); },
+  nextDay(){
+    SFX.click();
+    if(S.phase !== 'result' && S.phase !== 'end') returnCart();
+    persist();
+    CUST.forEach(c => scene.remove(c.mesh)); CUST.length = 0; REGC = null; custTimer = 12;
+    const nd = (S.day || 1) + 1;
+    for(let i = REPAIR_Q.length-1; i >= 0; i--){
+      if(nd > REPAIR_Q[i].deadline + 1){ REPAIR_Q.splice(i,1); S.rep = Math.max(0, S.rep - 1); }
+    }
+    S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:nd});
+    resetWorld(); openMissionChoice();
+    say(`${nd}日目。期限の近い修理から確認しよう。`);
+  },
+  closeShopFinal(){ SFX.click(); if(S.phase !== 'result') returnCart(); persist(); S.phase = 'end'; openEnd(); },
   nextOrder(){
     SFX.click();
-    if(S.orderIdx >= ORDERS.length - 1){ S.phase = 'end'; return openEnd(); }
-    const keep = {money:S.money, rep:S.rep, orderIdx:S.orderIdx + 1};
-    S = Object.assign(newState(), keep);
+    S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:S.day, orderIdx:S.orderIdx + 1});
     resetWorld();
-    openOrder();
+    openMissionChoice();
   },
-  restart(){ SFX.click(); tutIdx = -1; ORDERS = shuffledOrders(); S = newState(); resetWorld(); openOrder(); },
+  pickMission(arg){
+    const cand = MISSION_CANDS[+arg];
+    if(cand.repair){ const qi = REPAIR_Q.indexOf(cand); if(qi >= 0) REPAIR_Q.splice(qi, 1); }
+    ORDERS[S.orderIdx] = cand;
+    SFX.click(); openOrder();
+  },
+  closeShop(){ SFX.click(); persist(); S.phase = 'end'; openEnd(); },
+  restart(){
+    SFX.click(); tutIdx = -1; ORDERS = [];
+    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; writeSave();
+    CUST.forEach(c => scene.remove(c.mesh)); CUST.length = 0; REGC = null; REPAIR_Q.length = 0; custTimer = 12;
+    Object.keys(STOCK).forEach(k => delete STOCK[k]);
+    S = newState(); resetWorld(); openMissionChoice();
+  },
 };
 
 function resetWorld(){
@@ -1205,12 +1438,286 @@ document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('dblclick', e => e.preventDefault());
 
 // ===== 開始 =====
-function startGame(withTut){
+
+// ===== 在庫・お客さん・修理・出口 =====
+const STOCK = {};
+const stockOf = id => (id in STOCK) ? STOCK[id] : 3;
+function stockAdd(id, n){ STOCK[id] = Math.max(0, Math.min(5, stockOf(id) + n)); }
+function restockAll(){ Object.values(PARTS).flat().forEach(p => { if(stockOf(p.id) < 5) stockAdd(p.id, 1); }); }
+let restockT = 0;
+function returnCart(){
+  if(S.repair){ const id = S.cart[S.repair.key]; if(id && id !== S.repair.brokenId) stockAdd(id, 1); return; }
+  Object.values(S.cart).forEach(id => { if(id) stockAdd(id, 1); });
+}
+const CUST = [];
+let REGC = null, custTimer = 12;
+const REPAIR_Q = [];
+const CUST_ENTRY = {x:-2, z:11.2};
+const CUST_SPOTS = [{x:0,z:9.7},{x:1.6,z:9.7}];
+const REPAIR_TPL = [
+  {cpu:'c12', mb:'m5', ram:'r3', psu:'p1', case:'k2', cooler:'h1', storage:'s1'},
+  {cpu:'c7', mb:'m5', ram:'r3', psu:'p5', case:'k2', cooler:'h1', storage:'s1', gpu:'g5'},
+];
+const SYMPTOM = {cpu:'勝手に再起動を繰り返す', mb:'画面が映らない', ram:'ビープ音が鳴る', gpu:'映像が乱れる', psu:'電源がすぐ落ちる', cooler:'異音がして高温になる', storage:'OSが起動しない'};
+const NAMES = ['鈴木','佐藤','高橋','田中','伊藤','渡辺','中村','小林','加藤','吉田'];
+function makeRepairJob(){
+  const tpl = REPAIR_TPL[Math.floor(Math.random()*REPAIR_TPL.length)];
+  const cart = Object.assign({}, tpl);
+  const keys = Object.keys(cart).filter(k => k !== 'case' && SYMPTOM[k]);
+  const key = keys[Math.floor(Math.random()*keys.length)];
+  const fee = {cpu:9000, mb:8000, ram:6000, gpu:10000, psu:6000, cooler:5000, storage:6000}[key] || 7000;
+  const wantDays = 1 + Math.floor(Math.random()*2);
+  return {client: NAMES[Math.floor(Math.random()*NAMES.length)] + 'さん', job:'修理依頼',
+    letter:`${LABEL[key]}のあたりが怪しいです。電源を入れると${SYMPTOM[key]}。${wantDays}日以内に直して返してください。`,
+    budget: fee + 4000, minPerf: 0, wantDays, repair:{key, brokenId: tpl[key], cart, fee}};
+}
+function makeCustomer(){
+  const g = new THREE.Group();
+  const pick = a => a[Math.floor(Math.random()*a.length)];
+  const shirt = pick([0x3d7bd6,0xd65b3d,0x3dbb7a,0x9b59b6,0xe0b93d,0xf0f0f0]), pants = pick([0x2b2f3a,0x4a4f5e,0x1d2233,0x6b5b45]);
+  const hair = pick([0x2a1d12,0x6b4a2a,0x111111,0xc9a36a,0x8c8c8c]), skin = pick([0xf1c6a0,0xe0b088,0xc68a5e]);
+  const bx = (w,h,d,c,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat(c)); m.position.set(x,y,z); g.add(m); return m; };
+  bx(0.11,0.42,0.13,pants,-0.07,0.22,0); bx(0.11,0.42,0.13,pants,0.07,0.22,0);       // 脚
+  bx(0.12,0.07,0.2,0x1a1a1f,-0.07,0.035,0.03); bx(0.12,0.07,0.2,0x1a1a1f,0.07,0.035,0.03); // 靴
+  bx(0.32,0.44,0.2,shirt,0,0.64,0);                                                  // 胴体
+  bx(0.2,0.05,0.02,0xffffff,0,0.85,0.105);                                           // 襟
+  bx(0.09,0.4,0.1,shirt,-0.22,0.64,0); bx(0.09,0.4,0.1,shirt,0.22,0.64,0);           // 腕
+  bx(0.085,0.08,0.09,skin,-0.22,0.4,0); bx(0.085,0.08,0.09,skin,0.22,0.4,0);         // 手
+  bx(0.09,0.08,0.09,skin,0,0.9,0);                                                   // 首
+  bx(0.22,0.24,0.22,skin,0,1.1,0);                                                   // 顔
+  bx(0.24,0.1,0.24,hair,0,1.2,0); bx(0.24,0.06,0.04,hair,0,1.16,0.11);              // 髪・前髪
+  bx(0.035,0.03,0.02,0x111111,-0.05,1.11,0.115); bx(0.035,0.03,0.02,0x111111,0.05,1.11,0.115); // 目
+  bx(0.06,0.012,0.02,0x8a4a3a,0,1.04,0.115);                                         // 口
+  if(Math.random() < 0.4){ bx(0.09,0.012,0.01,0x222222,-0.05,1.11,0.125); bx(0.09,0.012,0.01,0x222222,0.05,1.11,0.125); bx(0.012,0.012,0.01,0x222222,0,1.11,0.125); } // 眼鏡
+  g.scale.setScalar(0.92 + Math.random()*0.12);
+  return g;
+}
+function addCarryBox(g){
+  const b = new THREE.Mesh(new THREE.BoxGeometry(0.34,0.26,0.3), mat(0xc89b5b)); b.position.set(0,0.6,0.22); g.add(b);
+  const tape = new THREE.Mesh(new THREE.BoxGeometry(0.04,0.27,0.31), mat(0xe9d7a0)); tape.position.set(0,0.6,0.22); g.add(tape);
+}
+function spawnCustomer(){
+  if(CUST.length >= 3 || S.phase === 'end') return;
+  const used = CUST.filter(c => c.state !== 'leave').map(c => c.slot);
+  const slot = [0,1].find(i => !used.includes(i)); if(slot === undefined) return;
+  const g = makeCustomer(); g.position.set(CUST_ENTRY.x, 0, CUST_ENTRY.z); scene.add(g);
+  const c = {mesh:g, state:'walk', wait:55, slot, kind:'buy', item:null, repair:null};
+  const cands = [];
+  ['cpu','mb','ram','gpu','psu','cooler','storage','hdd','fan'].forEach(k => PARTS[k].forEach(p => { if(stockOf(p.id) > 0) cands.push({key:k, part:p}); }));
+  if(Math.random() < 0.55 && cands.length){ c.item = cands[Math.floor(Math.random()*cands.length)]; }
+  else { c.kind = 'repair'; c.repair = makeRepairJob(); addCarryBox(g); }
+  CUST.push(c);
+}
+function updateCustomers(dt){
+  custTimer -= dt;
+  if(custTimer <= 0){ spawnCustomer(); custTimer = 22 + Math.random()*26; }
+  for(let i = CUST.length-1; i >= 0; i--){
+    const c = CUST[i], m = c.mesh;
+    if(c.state === 'walk' || c.state === 'leave'){
+      const tgt = c.state === 'walk' ? CUST_SPOTS[c.slot] : CUST_ENTRY;
+      const dx = tgt.x - m.position.x, dz = tgt.z - m.position.z, d = Math.hypot(dx, dz);
+      if(d < 0.05){
+        if(c.state === 'walk') c.state = 'wait';
+        else { scene.remove(m); CUST.splice(i,1); if(REGC === c) REGC = null; }
+      } else {
+        const sp = Math.min(d, 1.6*dt);
+        m.position.x += dx/d*sp; m.position.z += dz/d*sp; m.rotation.y = Math.atan2(dx, dz);
+      }
+    } else if(c.state === 'wait'){
+      c.wait -= dt;
+      c.waited = (c.waited || 0) + dt;
+      if(c.waited >= 20){
+        c.bellT = (c.bellT ?? 0) - dt;
+        if(c.bellT <= 0){ SFX.bell(); c.rings = (c.rings || 0) + 1; c.bellT = 12; say('チリンチリン！ レジでお客さんがベルを鳴らしている。'); }
+      }
+      if(c.wait <= 0){ c.state = 'leave'; S.rep = Math.max(0, S.rep - 1); say('お客さんが待ちきれず帰ってしまった…（評判 -1）'); }
+    }
+  }
+}
+const waitingCust = () => CUST.find(c => c.state === 'wait');
+function openRegister(){
+  const c = waitingCust(); if(!c) return;
+  REGC = c; SFX.open();
+  const idx = CUST.indexOf(c);
+  if(c.kind === 'buy'){
+    const pid = c.item.part.id;
+    if(stockOf(pid) <= 0){
+      return openPanel(`<h3>レジ</h3><p>お客さん「${c.item.part.name}、売り切れですか…。また来ます」</p>
+        <button class="btn primary" data-act="custLeave">お見送りする</button>`, false);
+    }
+    return openPanel(`<h3>レジ（販売）</h3><p>お客さん：「${c.item.part.name}が欲しいです。」</p>
+      <p>${LABEL[c.item.key]}：${c.item.part.name}　<b class="gold">${yen(c.item.part.price)}</b>　在庫 ${stockOf(pid)}</p>
+      <button class="btn primary" data-act="sellPart">販売する（${yen(c.item.part.price)}を受け取る）</button>
+      <button class="btn" data-act="custLeave">断る</button>`, false);
+  }
+  openPanel(`<h3>レジ（修理受付）</h3><p>お客さん：「PCの調子が悪いんです。直せますか？」</p>
+    <p class="muted">${c.repair.letter}</p>
+    <button class="btn primary" data-act="takeRepair">修理を預かる（修理依頼に追加）</button>
+    <button class="btn" data-act="custLeave">断る</button>`, false);
+}
+function openExit(){
+  SFX.open();
+  const working = !['order','end'].includes(S.phase) && S.cart && Object.keys(S.cart).length > 0;
+  openPanel(`<h3>出口</h3><p>今日の営業を終えて帰りますか？</p>
+    <p>所持金 <b class="gold">${yen(S.money)}</b>　累計納品 ${S.done || 0} 件</p>
+    ${working ? '<p class="muted">作りかけの注文は取り消しになり、棚の部品は在庫に戻ります。</p>' : ''}
+    <button class="btn primary" data-act="nextDay">閉店して、次の営業日へ</button>
+    <button class="btn" data-act="closeShopFinal">店を畳む（最終結果を見る）</button>
+    <button class="btn" data-act="cancelExit">まだ残る</button>`);
+}
+function startRepairWorld(){
+  const r = curO().repair; if(!r) return;
+  S.cart = Object.assign({}, r.cart);
+  S.repair = {key:r.key, brokenId:r.brokenId, done:false, fee:r.fee};
+  S.steps = []; S.step = 0; S.screwing = false; S.damage = 0;
+  caseGroup.children.filter(c => c.userData.inst).forEach(c => caseGroup.remove(c));
+  STEPS.forEach(st => { if(S.cart[st.key]) caseGroup.add(installMesh(st.key)); });
+  rebuildPartsTable();
+}
+function repairSwap(){
+  const r = S.repair; if(!r || r.done) return;
+  if(!held || held.type !== 'part' || held.key !== r.key) return say(`${LABEL[r.key]}の代わりを部品台から持ってきて交換しよう。`);
+  if(S.cart[r.key] === r.brokenId) return say('同じ部品では直せない。棚で別の部品を選ぼう。');
+  camera.remove(held.mesh); held = null;
+  caseGroup.children.filter(c => c.userData.inst && c.userData.key === r.key).forEach(c => caseGroup.remove(c));
+  caseGroup.add(installMesh(r.key));
+  r.done = true; SFX.place(); S.phase = 'test';
+  say('交換した。電源ボタンを押して動作確認しよう。');
+}
+function openMissionChoiceQueue(){ return REPAIR_Q.slice(0,1); }
+function reviewFor(c){
+  const r = c.rings || 0, w = c.waited || 0;
+  if(r === 0 && w < 12) return {rep:1, text:'👍 レビュー：「すぐ対応してくれて助かりました！」'};
+  if(r === 0 && w < 20) return {rep:0, text:'🙂 レビュー：「まあ普通ですね」'};
+  if(r <= 1) return {rep:-1, text:'😠 レビュー：「待たされました…」'};
+  return {rep:-2, text:'😡 レビュー：「ベルを何度も鳴らさせるなんて。二度と来ません」'};
+}
+
+// ===== ログイン・クラウド保存（Firebase Auth / Firestore） =====
+// 下の FIREBASE_CONFIG に、Firebaseコンソールで作ったウェブアプリの設定を貼り付けてください。
+const FIREBASE_CONFIG = null;
+// 例: { apiKey:'...', authDomain:'your-project.firebaseapp.com', projectId:'your-project', appId:'...' }
+let fbAuth = null, fbDb = null, fbUser = null;
+function setAuthStatus(t){ const el = document.getElementById('authStatus'); if(el) el.textContent = t; }
+function authMsg(e){
+  return ({
+    'auth/invalid-email':'メールアドレスの形式が正しくありません',
+    'auth/weak-password':'パスワードは6文字以上にしてください',
+    'auth/invalid-credential':'メールアドレスかパスワードが違います',
+    'auth/wrong-password':'メールアドレスかパスワードが違います',
+    'auth/user-not-found':'メールアドレスかパスワードが違います',
+    'auth/email-already-in-use':'このメールアドレスは登録済みです',
+    'auth/too-many-requests':'試行回数が多いです。少し時間をおいてください',
+    'auth/network-request-failed':'通信に失敗しました'
+  })[e && e.code] || 'エラーが発生しました';
+}
+function fbReady(){ return !!FIREBASE_CONFIG && typeof firebase !== 'undefined'; }
+function refreshContinue(){
+  const old = document.getElementById('contBtn'); if(old) old.remove();
+  if(!(SAVE.done > 0)) return;
+  const b = document.createElement('button');
+  b.className = 'btn primary'; b.id = 'contBtn';
+  b.textContent = `続きから（累計${SAVE.done}件・所持金 ${yen(SAVE.money)}）`;
+  b.addEventListener('click', () => startGame(false, true));
+  const t = document.getElementById('tutYes');
+  t.parentNode.insertBefore(b, t);
+}
+function saveCloud(){
+  if(!fbUser || !fbDb) return;
+  fbDb.collection('saves').doc(fbUser.uid).set({
+    money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach,
+    updated: firebase.firestore.FieldValue.serverTimestamp()
+  }, {merge:true}).catch(() => setAuthStatus('クラウド保存に失敗しました（通信を確認）'));
+}
+async function loadCloud(){
+  try{
+    const ref = fbDb.collection('saves').doc(fbUser.uid);
+    const d = await ref.get();
+    if(d.exists){
+      const j = d.data();
+      SAVE = Object.assign(SAVE, {money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : []});
+      writeSave();
+    } else saveCloud();
+    refreshContinue();
+    setAuthStatus(`ログイン中：${fbUser.email}（クラウドに保存）`);
+  }catch(e){ setAuthStatus('保存データの読み込みに失敗しました（Firestoreのルールを確認）'); }
+}
+async function authSignIn(){
+  const em = document.getElementById('authEmail').value.trim();
+  const pwEl = document.getElementById('authPw'); const pw = pwEl.value; pwEl.value = '';
+  try{ await fbAuth.signInWithEmailAndPassword(em, pw); }
+  catch(e){ setAuthStatus('ログインできません：' + authMsg(e)); }
+}
+async function authSignUp(){
+  const em = document.getElementById('authEmail').value.trim();
+  const pwEl = document.getElementById('authPw'); const pw = pwEl.value; pwEl.value = '';
+  try{ await fbAuth.createUserWithEmailAndPassword(em, pw); }
+  catch(e){ setAuthStatus('登録できません：' + authMsg(e)); }
+}
+function initAuth(){
+  const inBtn = document.getElementById('authIn'), upBtn = document.getElementById('authUp'), outBtn = document.getElementById('authOut');
+  if(!fbReady()){
+    setAuthStatus('ログインは未設定です（この端末に保存します）');
+    [inBtn, upBtn].forEach(b => b.disabled = true);
+    return;
+  }
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth = firebase.auth(); fbDb = firebase.firestore();
+    fbAuth.onAuthStateChanged(u => {
+      fbUser = u;
+      outBtn.style.display = u ? 'block' : 'none';
+      inBtn.style.display = upBtn.style.display = u ? 'none' : 'inline-block';
+      if(u) loadCloud(); else setAuthStatus('ログインしていません（この端末に保存します）');
+    });
+  }catch(e){ setAuthStatus('Firebaseの初期化に失敗しました'); [inBtn, upBtn].forEach(b => b.disabled = true); }
+  inBtn.addEventListener('click', authSignIn);
+  upBtn.addEventListener('click', authSignUp);
+  outBtn.addEventListener('click', () => { if(fbAuth) fbAuth.signOut(); });
+}
+initAuth();
+
+// ===== セーブ・実績・次の任務 =====
+const SAVE_KEY = 'pcws-save-v1';
+let SAVE = {money:0, rep:0, done:0, ach:[]};
+try{ const j = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if(j) SAVE = Object.assign(SAVE, j); }catch(e){}
+function writeSave(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); }catch(e){} }
+function persist(){ SAVE.money = S.money; SAVE.rep = S.rep; SAVE.done = S.done || 0; SAVE.day = S.day || 1; writeSave(); saveCloud(); }
+function curO(){ return ORDERS[S.orderIdx] || {client:'', job:'', letter:'', budget:0, minPerf:0}; }
+const ACH = [
+  {id:'first', name:'初めての納品', desc:'注文を1件納品する', ok:st => st.done >= 1},
+  {id:'five', name:'看板工房', desc:'累計5件納品する', ok:st => st.done >= 5},
+  {id:'twenty', name:'常連持ち', desc:'累計20件納品する', ok:st => st.done >= 20},
+  {id:'star5', name:'★5の仕事', desc:'★5の評価をもらう', ok:(st,r) => r.stars === 5},
+  {id:'flawless', name:'無傷の一台', desc:'損傷・梱包ミス・動作不良ゼロで完成', ok:(st,r) => r.q === 100},
+  {id:'igpu', name:'GPUなしの英断', desc:'グラフィックボードなしで完成', ok:st => !st.cart.gpu},
+  {id:'itx', name:'小さな巨人', desc:'Mini-ITXのマザーボードで完成', ok:st => !!st.cart.mb && /ITX/.test((PARTS.mb.find(m => m.id === st.cart.mb) || {name:''}).name)},
+  {id:'hdd8', name:'大容量派', desc:'8TBのHDDを積んで完成', ok:st => st.cart.hdd === 'd4'},
+  {id:'rich', name:'億万長者の卵', desc:'所持金が100万円を超える', ok:st => st.money >= 1000000},
+];
+let MISSION_CANDS = [];
+function openMissionChoice(){
+  SFX.open();
+  MISSION_CANDS = [...openMissionChoiceQueue(), ...[...ORDER_POOL].sort(() => Math.random() - 0.5).slice(0, 3 - Math.min(1, REPAIR_Q.length))];
+  openPanel(`<h3>次の任務を選ぶ</h3><p class="muted">届いた注文から一件を選んで受けよう。</p>` +
+    MISSION_CANDS.map((o,i) => `<button class="btn" data-act="pickMission" data-arg="${i}"><b>${o.repair ? '🔧 ' : ''}${o.client}（${o.job}${o.repair && o.repair.deadline ? '・期限 ' + o.repair.deadline + '日目まで' : ''}）</b>　予算 <span class="gold">${yen(o.budget)}</span>　必要性能 ${o.minPerf}<br><span class="muted">「${o.letter}」</span></button>`).join('') +
+    (S.done > 0 ? `<button class="btn" data-act="closeShop">今日はここまで（店じまい）</button>` : ''), false);
+}
+function showAch(){
+  if(uiOpen) return;
+  SFX.open();
+  openPanel(`<h3>🏆 実績・記録</h3><p>累計納品 <b class="gold">${SAVE.done || 0}</b> 件　解除 ${SAVE.ach.length}/${ACH.length}</p>` +
+    ACH.map(a => `<div class="${SAVE.ach.includes(a.id) ? 'ok' : 'muted'}">${SAVE.ach.includes(a.id) ? '✅' : '🔒'} <b>${a.name}</b>　${a.desc}</div>`).join(''));
+}
+document.getElementById('achBtn').addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); showAch(); });
+refreshContinue();
+
+function startGame(withTut, cont){
   ensureAudio();
-  ORDERS = shuffledOrders();
   document.getElementById('start').style.display = 'none';
-  tutIdx = withTut ? 0 : -1;
-  openOrder();
+  if(cont){ S = Object.assign(newState(), {money:SAVE.money, rep:SAVE.rep, done:SAVE.done, day:SAVE.day || 1}); tutIdx = -1; }
+  else tutIdx = withTut ? 0 : -1;
+  openMissionChoice();
   if(withTut) showTut();
 }
 document.getElementById('tutYes').addEventListener('click', () => startGame(true));
@@ -1238,6 +1745,7 @@ function objective(){
   switch(S.phase){
     case 'order': return '注文メールを確認';
     case 'shop': {
+      if(S.repair && !S.repair.done) return S.cart[S.repair.key] === S.repair.brokenId ? `故障：${LABEL[S.repair.key]}。棚で代わりを選ぼう` : `代わりの部品を部品台から持って、組み立て台で交換`;
       const miss = reqMissing();
       return miss.length ? `未選択：${miss.join('、')}（左の棚で選ぶ）` : '必要なパーツはそろった。奥の机の「組み立ての準備を確認」へ';
     }
@@ -1253,6 +1761,10 @@ function objective(){
 
 // 次に行く場所を画面上の案内（方向と距離）で表示
 function targetOf(){
+  if(S.repair && !S.repair.done && S.phase === 'shop'){
+    if(S.cart[S.repair.key] !== S.repair.brokenId && held) return {x:2, z:0, name:'組み立て台'};
+    const i = CAT.findIndex(c => c.key === S.repair.key); return {x:-8.6, z:SHELF_Z0 + i*SHELF_DZ, name:`${LABEL[S.repair.key]}の棚`};
+  }
   if(S.phase === 'shop'){
     const nk = neededKeys();
     if(nk.length){ const i = CAT.findIndex(c => c.key === nk[0]); return {x:-8.6, z:SHELF_Z0 + i*SHELF_DZ, name:`${LABEL[nk[0]]}の棚`}; }
@@ -1284,6 +1796,32 @@ function updateTarget(){
   el.textContent = `▶ ${t.name}：${dir}（約${dist.toFixed(1)}m）`;
 }
 
+// 手（一人称の腕）：持つ物に手を移す
+scene.add(camera);
+const HANDS = new THREE.Group(); camera.add(HANDS);
+const SKIN = 0xf1c6a0, SLEEVE = 0x3a4a66;
+const HAND = {};
+const hvec = {L:new THREE.Vector3(-0.3,-0.42,-0.55), R:new THREE.Vector3(0.3,-0.42,-0.55)};
+['L','R'].forEach(side => {
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.34), mat(SLEEVE)); HANDS.add(arm);
+  const hand = new THREE.Mesh(new THREE.BoxGeometry(0.09,0.08,0.1), mat(SKIN)); HANDS.add(hand);
+  HAND[side] = {arm, hand};
+});
+function updateHands(dt){
+  const anc = held ? (held.type === 'part' ? held.mesh.position : held.type === 'case' ? caseGroup.position : null) : null;
+  const t = {
+    L: anc ? new THREE.Vector3(anc.x-0.13, anc.y-0.03, anc.z+0.03) : new THREE.Vector3(-0.3,-0.42,-0.55),
+    R: anc ? new THREE.Vector3(anc.x+0.13, anc.y-0.03, anc.z+0.03) : new THREE.Vector3(0.3,-0.42,-0.55),
+  };
+  ['L','R'].forEach(side => {
+    hvec[side].lerp(t[side], Math.min(1, dt*10));
+    const v = hvec[side];
+    HAND[side].hand.position.copy(v);
+    HAND[side].arm.position.set(v.x*1.05, v.y-0.12, v.z+0.22);
+    HAND[side].arm.rotation.x = 0.35;
+  });
+}
+
 let last = performance.now();
 let touchAct = false, screwHold = 0;
 const promptEl = document.getElementById('prompt');
@@ -1291,10 +1829,9 @@ let tutShown = -2;
 function loop(t){
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
   if(!uiOpen) move(dt);
-  if(S.screwing && !uiOpen && (keys.KeyE || touchAct)){
-    screwHold += dt;
-    if(screwHold >= 0.8){ screwHold = 0; screw(); }
-  } else screwHold = 0;
+  updateCustomers(dt);
+  updateHands(dt);
+  restockT += dt; if(restockT >= 30){ restockT = 0; restockAll(); }
   camera.rotation.set(pitch, yaw, 0, 'YXZ');
 
   updateTut();
@@ -1307,8 +1844,8 @@ function loop(t){
   }
 
   document.getElementById('obj').textContent = '目標：' + objective();
-  document.getElementById('stat').textContent = `所持金 ${yen(S.money)}　評判 ${S.rep}　注文 ${Math.min(S.orderIdx+1, ORDERS.length)}/${ORDERS.length}　損傷 ${S.damage}`;
-  document.getElementById('total').textContent = `選んだパーツ合計 ${yen(total())} ／ 予算 ${yen(ORDERS[S.orderIdx].budget)}`;
+  document.getElementById('stat').textContent = `所持金 ${yen(S.money)}　評判 ${S.rep}　${S.day || 1}日目　累計 ${S.done || 0}件　損傷 ${S.damage}`;
+  document.getElementById('total').textContent = `選んだパーツ合計 ${yen(total())} ／ 予算 ${yen(curO().budget)}`;
 
   updateTarget();
   const near = uiOpen ? null : nearest();
