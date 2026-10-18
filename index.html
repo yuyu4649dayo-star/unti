@@ -74,9 +74,18 @@ canvas{display:block;touch-action:none}
   あなたは小さな自作PC工房の店主。<br>
   <span id="startText"></span><br><br>
   <div id="authBox" style="text-align:left;margin:8px 0">
-    <input class="inp" id="authEmail" type="email" placeholder="メールアドレス" autocomplete="username">
-    <input class="inp" id="authPw" type="password" placeholder="パスワード（6文字以上）" autocomplete="current-password">
-    <div style="display:flex;gap:8px"><button class="btn" id="authIn" style="flex:1">ログイン</button><button class="btn" id="authUp" style="flex:1">新規登録</button><button class="btn" id="authOut" style="flex:1;display:none">ログアウト</button></div>
+    <div id="loginView">
+      <input class="inp" id="authEmail" type="email" placeholder="メールアドレス" autocomplete="username">
+      <input class="inp" id="authPw" type="password" placeholder="パスワード" autocomplete="current-password">
+      <div style="display:flex;gap:8px"><button class="btn" id="authIn" style="flex:1">ログイン</button><button class="btn" id="authUp" style="flex:1">新規登録の画面へ</button><button class="btn" id="authOut" style="flex:1;display:none">ログアウト</button></div>
+    </div>
+    <div id="signupView" style="display:none">
+      <p style="margin:4px 0;font-weight:bold">新規登録</p>
+      <input class="inp" id="suEmail" type="email" placeholder="メールアドレス（例: name@example.com）" autocomplete="email">
+      <input class="inp" id="suPw" type="password" placeholder="パスワード（6文字以上）" autocomplete="new-password">
+      <input class="inp" id="suPw2" type="password" placeholder="パスワード（もう一度入力）" autocomplete="new-password">
+      <div style="display:flex;gap:8px"><button class="btn primary" id="suSubmit" style="flex:1">登録する</button><button class="btn" id="suBack" style="flex:1">戻る</button></div>
+    </div>
     <div id="authStatus" class="muted" style="font-size:13px"></div>
   </div>
   <button class="btn primary" id="tutYes">チュートリアルを見て始める</button>
@@ -1844,16 +1853,52 @@ async function loadCloud(){
   }catch(e){ setAuthStatus('保存データの読み込みに失敗しました（Firestoreのルールを確認）'); }
 }
 async function authSignIn(){
-  const em = document.getElementById('authEmail').value.trim();
+  const em = cleanEmail(document.getElementById('authEmail').value);
   const pwEl = document.getElementById('authPw'); const pw = pwEl.value; pwEl.value = '';
-  try{ await fbAuth.signInWithEmailAndPassword(em, pw); }
+  try{
+    const cred = await fbAuth.signInWithEmailAndPassword(em, pw);
+    if(!cred.user.emailVerified){
+      await sendVerifyMail(cred.user);
+      await fbAuth.signOut();
+      setAuthStatus('メールアドレスの確認が済んでいません。届いた確認メールのリンクを開いてから、もう一度ログインしてください（確認メールを再送しました）');
+    }
+  }
   catch(e){ setAuthStatus('ログインできません：' + authMsg(e)); }
 }
+async function sendVerifyMail(user){
+  try{ await user.sendEmailVerification(); }
+  catch(e){ if(e.code !== 'auth/too-many-requests') throw e; }
+}
+function cleanEmail(v){ return (v || '').normalize('NFKC').replace(/\s/g, '').trim(); }
+function showSignup(){
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('signupView').style.display = 'block';
+  setAuthStatus('新しいメールアドレスとパスワードを入力してください');
+}
+function showLogin(){
+  document.getElementById('signupView').style.display = 'none';
+  document.getElementById('loginView').style.display = 'block';
+}
+let signingUp = false;
 async function authSignUp(){
-  const em = document.getElementById('authEmail').value.trim();
-  const pwEl = document.getElementById('authPw'); const pw = pwEl.value; pwEl.value = '';
-  try{ await fbAuth.createUserWithEmailAndPassword(em, pw); }
+  const em = cleanEmail(document.getElementById('suEmail').value);
+  const pw = document.getElementById('suPw').value;
+  const pw2 = document.getElementById('suPw2').value;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return setAuthStatus('メールアドレスの形式が正しくありません（@を含む、半角英数字のアドレスを入力してください）');
+  if(pw.length < 6) return setAuthStatus('パスワードは6文字以上にしてください');
+  if(pw !== pw2) return setAuthStatus('確認用のパスワードが一致しません');
+  if(!fbAuth) return setAuthStatus('ログインの準備ができていません（Firebaseの設定を確認してください）');
+  signingUp = true;
+  try{
+    const cred = await fbAuth.createUserWithEmailAndPassword(em, pw);
+    await sendVerifyMail(cred.user);
+    await fbAuth.signOut();
+    document.getElementById('suPw').value = ''; document.getElementById('suPw2').value = '';
+    showLogin();
+    setAuthStatus('確認メールを送りました。メール内のリンクを開いて登録を完了してから、ログインしてください');
+  }
   catch(e){ setAuthStatus('登録できません：' + authMsg(e)); }
+  finally{ signingUp = false; }
 }
 function initAuth(){
   const inBtn = document.getElementById('authIn'), upBtn = document.getElementById('authUp'), outBtn = document.getElementById('authOut');
@@ -1866,6 +1911,7 @@ function initAuth(){
     firebase.initializeApp(FIREBASE_CONFIG);
     fbAuth = firebase.auth(); fbDb = firebase.firestore();
     fbAuth.onAuthStateChanged(u => {
+      if(u && !u.emailVerified && !signingUp){ fbAuth.signOut(); return; }
       fbUser = u;
       outBtn.style.display = u ? 'block' : 'none';
       inBtn.style.display = upBtn.style.display = u ? 'none' : 'inline-block';
@@ -1873,7 +1919,9 @@ function initAuth(){
     });
   }catch(e){ setAuthStatus('Firebaseの初期化に失敗しました'); [inBtn, upBtn].forEach(b => b.disabled = true); }
   inBtn.addEventListener('click', authSignIn);
-  upBtn.addEventListener('click', authSignUp);
+  upBtn.addEventListener('click', showSignup);
+  document.getElementById('suSubmit').addEventListener('click', authSignUp);
+  document.getElementById('suBack').addEventListener('click', () => { showLogin(); setAuthStatus(''); });
   outBtn.addEventListener('click', () => { if(fbAuth) fbAuth.signOut(); });
 }
 initAuth();
