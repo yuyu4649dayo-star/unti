@@ -385,12 +385,12 @@ const PARTS = {
     {id:'r11', name:'DDR5-4800 16GB（8GB×2）', type:'DDR5', price:27000},
     {id:'r12', name:'DDR5-5200 16GB（8GB×2）', type:'DDR5', price:28000},
     {id:'r13', name:'DDR5-6000 16GB（8GB×2）', type:'DDR5', price:35000},
-    {id:'r14', name:'DDR4-1600 16GB（8GB×2）', type:'DDR4', price:18000},
-    {id:'r15', name:'DDR4-1866 16GB（8GB×2）', type:'DDR4', price:18000},
-    {id:'r16', name:'DDR4-2133 16GB（8GB×2）', type:'DDR4', price:18000},
-    {id:'r17', name:'DDR4-2400 16GB（8GB×2）', type:'DDR4', price:17000},
-    {id:'r18', name:'DDR4-2666 16GB（8GB×2）', type:'DDR4', price:17000},
-    {id:'r19', name:'DDR4-2933 16GB（8GB×2）', type:'DDR4', price:16500},
+    {id:'r14', name:'DDR4-1600 16GB（8GB×2）', type:'DDR4', price:11000},
+    {id:'r15', name:'DDR4-1866 16GB（8GB×2）', type:'DDR4', price:12000},
+    {id:'r16', name:'DDR4-2133 16GB（8GB×2）', type:'DDR4', price:12500},
+    {id:'r17', name:'DDR4-2400 16GB（8GB×2）', type:'DDR4', price:13500},
+    {id:'r18', name:'DDR4-2666 16GB（8GB×2）', type:'DDR4', price:14500},
+    {id:'r19', name:'DDR4-2933 16GB（8GB×2）', type:'DDR4', price:15000},
     {id:'r20', name:'DDR5-6000 32GB（16GB×2）', type:'DDR5', price:62000},
     {id:'r21', name:'DDR5-6400 32GB（16GB×2）', type:'DDR5', price:60000},
     {id:'r22', name:'DDR5-6000 32GB RGB（16GB×2）', type:'DDR5', price:72000},
@@ -716,6 +716,62 @@ const ORDER_POOL = [
   {client:'そさん', job:'鉄道模型ファン', letter:'Blenderで線路の3Dモデルを作ります。', budget:200000, minPerf:62},
   {client:'たさん', job:'旅行ブロガー', letter:'写真の現像と動画編集です。ノートPCでは限界なので買い替えたい。', budget:120000, minPerf:44},
   {client:'ちさん', job:'天文学アマチュア', letter:'天体写真の画像処理を一晩中やります。熱と騒音が少ないことが条件です。', budget:190000, minPerf:60},
+  {client:'さくら小学校', job:'学校（職員室の事務用）', corp:true, letter:'職員室の事務用PCを一台お願いします。Officeとウェブ会議が動けば十分です。', budget:140000, minPerf:40},
+  {client:'青葉中学校', job:'学校（情報教室）', corp:true, letter:'情報の授業で使う一台です。長く使うので、壊れにくい構成でお願いします。', budget:160000, minPerf:50},
+  {client:'株式会社ひかり商事', job:'会社（経理部）', corp:true, letter:'会計ソフトと表計算を使う業務用です。安定性とサポートが大事です。', budget:200000, minPerf:55},
+  {client:'有限会社山田設計', job:'会社（CAD部門）', corp:true, letter:'CADの図面作成用です。描画の安定を最優先にお願いします。', budget:260000, minPerf:68},
+  {client:'南区役所 総務課', job:'役所（事務用）', corp:true, letter:'住民票の処理と事務作業に使います。静かで省電力なものを希望します。', budget:150000, minPerf:45},
+  {client:'ネクストデザイン株式会社', job:'会社（デザイン部）', corp:true, letter:'Photoshopとイラストレーターを使います。色が正確に出る構成でお願いします。', budget:230000, minPerf:66},
+  {client:'みどり幼稚園', job:'学校（事務用）', corp:true, letter:'園だより・名簿の作成に使います。難しい操作がなくて、安定して動くことが大事です。', budget:140000, minPerf:40},
+  {client:'東陽高等学校', job:'学校（進路指導室）', corp:true, letter:'進路資料の作成と、生徒の成績管理に使います。個人情報を扱うので、動作が安定していることが条件です。', budget:170000, minPerf:50},
+  {client:'北ヶ丘小学校', job:'学校（図書室の検索用）', corp:true, letter:'図書の検索端末として使います。静かで、ずっと点けっぱなしでも大丈夫なものを。', budget:120000, minPerf:35},
+  {client:'星光専門学校', job:'学校（デザイン科の教室）', corp:true, letter:'学生が10人ほどで同時に使うので、全員がPhotoshopを使えるように、余裕のある構成でお願いします。', budget:240000, minPerf:68},
+  {client:'緑風大学 研究室', job:'学校（研究室）', corp:true, letter:'数値解析の計算を夜通し回します。熱が溜まりにくい構成が条件です。', budget:280000, minPerf:78},
+  {client:'岡山市立図書館', job:'役所（事務用）', corp:true, letter:'蔵書の登録と貸出の端末に使います。タッチ操作が遅くないものを。', budget:130000, minPerf:40},
+  {client:'川辺町役場 税務課', job:'役所（事務用）', corp:true, letter:'固定資産税の計算ソフトを使います。古いソフトも動くように、安定性を最優先にしてください。', budget:150000, minPerf:45},
+  {client:'県立みなと病院 事務局', job:'役所（病院事務）', corp:true, letter:'医療事務のシステムを使うので、停止しないことが一番です。サポートの長いパーツで組んでください。', budget:190000, minPerf:52},
+  {client:'株式会社フジサワ工務店', job:'会社（設計・見積）', corp:true, letter:'CADと見積ソフトを使います。図面を開いても固まらないことが条件です。', budget:200000, minPerf:60},
+  {client:'株式会社ナカムラ運輸', job:'会社（配車管理）', corp:true, letter:'配車表の作成に使います。事務所のモニターを3画面つなげたいです。', budget:160000, minPerf:48},
+  {client:'有限会社コトブキ印刷', job:'会社（DTP）', corp:true, letter:'チラシのデザインと入稿データの作成に使います。色の正確さを優先してください。', budget:210000, minPerf:64},
+  {client:'ホシノ製薬株式会社', job:'会社（研究開発）', corp:true, letter:'分析データの処理に使います。大量のデータを扱うので、メモリを多めにお願いします。', budget:260000, minPerf:72},
+  {client:'株式会社ヤマト電子', job:'会社（開発部）', corp:true, letter:'社内の検証用PCです。仮想マシンを3台同時に動かします。', budget:230000, minPerf:66},
+  {client:'株式会社アオゾラ不動産', job:'会社（営業）', corp:true, letter:'物件情報の管理とWeb会議に使います。ふつうに安定していれば十分です。', budget:120000, minPerf:40},
+  {client:'大和建設株式会社', job:'会社（現場管理）', corp:true, letter:'工程表の作成と写真の整理に使います。現場で持ち運ぶことが多いので、静かな構成がいいです。', budget:170000, minPerf:52},
+  {client:'株式会社ミナト会計事務所', job:'会社（会計）', corp:true, letter:'会計ソフトで決算書を作成します。締め切り前は長時間使うので、安定性を重視してください。', budget:140000, minPerf:45},
+  {client:'株式会社シラカワ製作所', job:'会社（CAD・解析）', corp:true, letter:'機械部品の強度解析をします。予算は気にせず、性能を優先してください。', budget:290000, minPerf:80},
+  {client:'株式会社ハルカゼ広告', job:'会社（動画編集）', corp:true, letter:'企業のCMを編集します。4K素材を扱うので、書き出しの速さが大事です。', budget:240000, minPerf:70},
+  {client:'中央保育園', job:'学校（事務用）', corp:true, letter:'園児の写真と連絡帳の整理に使います。簡単に使えて、古くても安定するものがいいです。', budget:100000, minPerf:35},
+  {client:'東北大学附属研究所', job:'学校（研究室）', corp:true, letter:'機械学習の学習データを回します。GPUよりもメモリを多く積みたいです。', budget:300000, minPerf:82},
+  {client:'株式会社コダマ食品', job:'会社（在庫管理）', corp:true, letter:'在庫管理と出荷伝票の作成です。とにかく安いものを探しています。', budget:110000, minPerf:38},
+  {client:'株式会社ツキノ物流', job:'会社（事務）', corp:true, letter:'荷物の追跡と伝票の処理に使います。一日中使うので、熱くならないものを。', budget:130000, minPerf:42},
+  {client:'株式会社アサヒ法律事務所', job:'会社（事務）', corp:true, letter:'書類の作成とオンライン会議に使います。音が静かで、動作が安定していることが条件です。', budget:160000, minPerf:50},
+  {client:'大森歯科クリニック', job:'会社（受付・予約）', corp:true, letter:'予約システムと会計に使います。停止すると困るので安定性を重視してください。', budget:120000, minPerf:40},
+  {client:'みらい自動車整備工場', job:'会社（見積・管理）', corp:true, letter:'整備の見積もりと請求書の作成です。古いソフトが動けば大丈夫です。', budget:110000, minPerf:38},
+  {client:'株式会社ウミノ水産', job:'会社（事務）', corp:true, letter:'仕入れの管理と帳簿の作成です。シンプルな構成で十分です。', budget:100000, minPerf:36},
+  {client:'日本語学校 ことのは', job:'学校（教室）', corp:true, letter:'教材の作成と、生徒の動画学習に使います。教室で複数人が使うので、USBの数が多いものがいいです。', budget:150000, minPerf:46},
+  {client:'八幡高校 放送部', job:'学校（部活動）', corp:true, letter:'動画の編集と配信に使います。音声の録音をするので、ノイズの少ない構成を希望します。', budget:180000, minPerf:58},
+  {client:'株式会社テンマ製菓', job:'会社（商品開発）', corp:true, letter:'商品の写真編集と、レシピの管理です。写真の色味がきれいに出るとうれしいです。', budget:140000, minPerf:44},
+  {client:'株式会社ライト建築設計', job:'会社（設計）', corp:true, letter:'3Dの建物モデルを回しながら設計します。描画の安定を最優先にしてください。', budget:250000, minPerf:70},
+  {client:'県庁 情報政策課', job:'役所（情報システム）', corp:true, letter:'社内システムの検証用です。仮想マシンを多く動かすので、メモリとストレージを多めにお願いします。', budget:220000, minPerf:62},
+  {client:'市民活動センター', job:'役所（事務用）', corp:true, letter:'講座の資料作成と受付に使います。とにかく安くて、簡単に使えるものを。', budget:100000, minPerf:35},
+  {client:'株式会社ヨシダ電気工事', job:'会社（見積・図面）', corp:true, letter:'配線図の作成と見積もりに使います。図面ソフトが重くならないことが条件です。', budget:150000, minPerf:48},
+  {client:'株式会社ナギサ観光', job:'会社（予約・企画）', corp:true, letter:'ツアーの企画と予約管理に使います。Web会議もよくするので、カメラが綺麗に映るPCがいいです。', budget:140000, minPerf:45},
+  {client:'森の里 介護施設', job:'会社（事務・記録）', corp:true, letter:'介護記録の入力に使います。止まらないことと、静かなことが大事です。', budget:120000, minPerf:40},
+  {client:'株式会社クロダ機械', job:'会社（設計）', corp:true, letter:'金型の図面を開きます。画面の出力端子が多いものを希望します。', budget:210000, minPerf:62},
+  {client:'株式会社ユキノ化粧品', job:'会社（デザイン・企画）', corp:true, letter:'パッケージのデザインに使います。ディスプレイの色の再現が良いといいです。', budget:180000, minPerf:54},
+  {client:'西浜市 教育委員会', job:'役所（事務用）', corp:true, letter:'学校の予算管理と資料の作成に使います。セキュリティを重視してください。', budget:130000, minPerf:42},
+  {client:'株式会社ホクトウ土木', job:'会社（測量データ）', corp:true, letter:'測量データの処理に使います。大きなファイルを開くので、メモリとストレージを多く積んでください。', budget:230000, minPerf:64},
+  {client:'東都シンフォニー音楽教室', job:'学校（録音室）', corp:true, letter:'生徒の録音データを編集します。音が途切れないように、CPUの性能を優先してください。', budget:200000, minPerf:62},
+  {client:'株式会社ソラ・ハウジング', job:'会社（営業）', corp:true, letter:'物件の図面と資料の作成です。古いPCからの買い替えなので、使いやすさを大事にしてください。', budget:110000, minPerf:38},
+  {client:'株式会社キタゾノ食品工場', job:'会社（品質管理）', corp:true, letter:'検査データの集計と報告書の作成です。データの取り違えが起きないように、安定を重視してください。', budget:160000, minPerf:50},
+  {client:'清水港湾事務所', job:'役所（事務用）', corp:true, letter:'船舶の入出港の記録と書類作成です。停止しないことが大事です。', budget:140000, minPerf:44},
+  {client:'株式会社トモエ不動産管理', job:'会社（管理）', corp:true, letter:'マンションの管理記録とオンライン会議に使います。ふつうに安定していれば十分です。', budget:120000, minPerf:40},
+  {client:'株式会社ハナミズキ', job:'会社（経理）', corp:true, letter:'請求書の作成と会計ソフトに使います。静かな構成でお願いします。', budget:130000, minPerf:42},
+  {client:'大和学院 ゲーム制作科', job:'学校（実習室）', corp:true, letter:'学生がUnityでゲームを作ります。ビルドが速いと助かります。', budget:260000, minPerf:72},
+  {client:'株式会社ムサシノ製菓機械', job:'会社（設計）', corp:true, letter:'装置の設計図と解析を行います。図面が重くならないよう、性能に余裕のある構成がいいです。', budget:230000, minPerf:64},
+  {client:'株式会社ウエムラ写真館', job:'会社（写真現像）', corp:true, letter:'写真の現像と修正に使います。大きな画像を扱うので、メモリを多めにお願いします。', budget:190000, minPerf:60},
+  {client:'株式会社セイワ物産', job:'会社（事務）', corp:true, letter:'伝票の作成と在庫の確認です。最低限の性能で十分です。', budget:100000, minPerf:36},
+  {client:'株式会社オオゾラ電機', job:'会社（事務）', corp:true, letter:'社内の資料作成と在庫表に使います。ふつうの性能で十分です。', budget:120000, minPerf:40},
 ];
 function shuffledOrders(){ return [...ORDER_POOL].sort(() => Math.random() - 0.5).slice(0, 10); }
 let ORDERS = [];
@@ -786,7 +842,7 @@ function newState(){
 }
 let S = newState();
 const get = k => PARTS[k].find(p => p.id === S.cart[k]) || null;
-const total = () => CAT.reduce((s,c) => s + (get(c.key)?.price || 0), 0);
+const total = () => S.repair ? (get(S.repair.key)?.price || 0) : CAT.reduce((s,c) => s + (get(c.key)?.price || 0), 0);
 const perf = () => { const c = get('cpu'); if(!c) return 0; const g = get('gpu'); const gp = g ? g.perf : (c.igpuPerf || 0); return Math.round((c.perf + gp)/2); };
 // 必須パーツ（GPUとSSD/HDDは条件付き、ケースファンは任意）
 const REQ = ['cpu','mb','ram','psu','case','cooler'];
@@ -815,7 +871,7 @@ function checks(){
   if(p.cpu && p.psu){ const gt = p.gpu ? p.gpu.tdp : 0; const need = p.cpu.tdp + gt + 80; add(true, p.psu.watt >= need, p.psu.watt >= need ? `電源容量は足りる（${p.psu.watt}W / 必要 ${need}W以上）` : `電源が足りない（${p.psu.watt}W / 必要 ${need}W以上）`); }
   if(p.cpu && !p.gpu) add(true, !!p.cpu.igpu, '映像出力がない（GPUか内蔵GPUのCPUが必要）');
   if(p.cpu && p.cooler) add(true, p.cooler.sockets.includes(p.cpu.socket) && p.cpu.tdp <= p.cooler.maxTdp, `クーラーの対応（熱設計 ${p.cpu.tdp}W / 上限 ${p.cooler.maxTdp}W）`);
-  add(false, total() <= o.budget, `予算内（${yen(total())} / ${yen(o.budget)}）`);
+  if(!S.repair) add(false, total() <= o.budget, `予算内（${yen(total())} / ${yen(o.budget)}）`);
   add(false, perf() >= o.minPerf, `性能スコア（${perf()} / 必要 ${o.minPerf}）`);
   return {list:L, ready: all && L.every(x => x.ok)};
 }
@@ -893,8 +949,8 @@ function partModel(k){
       const pcb = /白|ホワイト/.test(nm) ? 0xd9dee5 : /ITX/.test(nm) ? 0x262a31 : 0x1d2a22;
       B(0.4,0.015,0.36,pcb,0,0.0075,0);                       // 基板
       B(0.1,0.01,0.1,0x0d0d10,-0.05,0.012,-0.04);             // CPUソケット
-      B(0.09,0.034,0.13,0x7d838c,-0.13,0.02,-0.04);           // VRMヒートシンク
-      for(let i=0;i<6;i++) B(0.094,0.036,0.005,0x59606a,-0.13,0.02,-0.1+i*0.024); // フィン
+      B(0.09,0.034,0.13,0x7d838c,-0.15,0.02,-0.04);           // VRMヒートシンク
+      for(let i=0;i<6;i++) B(0.094,0.036,0.005,0x59606a,-0.15,0.02,-0.1+i*0.024); // フィン
       for(let i=0;i<4;i++) B(0.012,0.025,0.14, i%2===0 ? 0xf2f2f2 : 0x1a1a1a, 0.1+i*0.02,0.012,0); // メモリスロット
       B(0.28,0.012,0.014,0x111111,0,0.012,-0.14);             // PCIe x16
       B(0.1,0.01,0.012,0x111111,-0.09,0.012,-0.2);            // PCIe x1
@@ -929,6 +985,7 @@ function partModel(k){
       B(0.06,0.0012,0.06,0xb9bec6,0,0.0145,0);                 // IHSの研磨面
       ST(0.07,0.07, labelTex([{text: amd ? 'AMD' : 'intel', size:30}, {text: short, size:34}], '#d5d9df', '#15181e', 256, 256), 0,0.0152,0, -Math.PI/2);
       if(/X3D/.test(nm)) ST(0.024,0.014, labelTex([{text:'X3D', size:40}], '#c9a227', '#1a1a1a', 128, 64), 0.024,0.0153,0.026, -Math.PI/2);
+      break;
     }
     case 'cooler': {
       C(0.035,0.02,0x9aa0a8,0,0.01,0);                        // ベース
@@ -941,6 +998,7 @@ function partModel(k){
       C(0.058,0.02,0x2c2f36,0,0.14,0);                        // ファン
       for(let i=0;i<7;i++){ const a=i*2*Math.PI/7; const bl=B(0.04,0.004,0.01,0x3a3f48,Math.cos(a)*0.03,0.152,Math.sin(a)*0.03); bl.rotation.y=-a; }
       if(/RGB/.test(nm)) T(0.058,0.002,0x3dd6ff,0,0.15,0).rotation.x = Math.PI/2;
+      break;
       break;
     }
     case 'ram': {
@@ -955,6 +1013,7 @@ function partModel(k){
       }
       ST(0.13,0.05, labelTex([{text: short, size:26}], light ? '#c9ced6' : '#222630', light ? '#15181e' : '#e8e8e8', 256, 96), 0.0285,0.07,0, 0, Math.PI/2);
       if(/RGB/.test(nm)) LED(0.036,0.004,0.12,0x3dd6ff,0.01,0.112,0);
+      break;
     }
     case 'gpu': {
       const amd = /RX/.test(nm);
@@ -973,6 +1032,7 @@ function partModel(k){
       ST(0.2,0.03, labelTex([{text: (amd ? 'RADEON ' : 'GeForce '), size:26}, {text: short, size:30}], '#14161c', amd ? '#ed1c24' : '#76b900', 512, 96), 0,0.1205,0, -Math.PI/2);
       B(0.005,0.1,0.02,0x9aa0a8,-0.1525,0.06,0);               // ブラケット
       if(/RGB/.test(nm)) LED(0.28,0.004,0.004,0x3dd6ff,0,0.12,0.022);
+      break;
     }
     case 'psu': {
       const body = /白|ホワイト/.test(nm) ? 0xe6e9ee : 0x2a2c31;
@@ -983,6 +1043,7 @@ function partModel(k){
       ST(0.12,0.12, labelTex([{text: `${p.watt || ''}W`, size:52}, {text: `80 PLUS ${(p.eff || '').toUpperCase()}`, size:22}], '#f2f2f2', '#111', 256, 256), 0,0.1205,0, -Math.PI/2);
       C(0.006,0.06,0x222222,0.12,0.06,-0.05);                  // ケーブル束
       C(0.006,0.06,0xe03e3e,0.125,0.06,-0.035);
+      break;
     }
     case 'storage': {
       const hs = /ヒートシンク/.test(nm);
@@ -991,6 +1052,7 @@ function partModel(k){
       B(0.02,0.002,0.02,0x0a0a0a,0.02,0.009,0);                // コントローラ
       if(hs){ B(0.082,0.014,0.028,0x2a2e36,0,0.015,0); ST(0.07,0.02, labelTex([{text: short, size:22}], '#2a2e36', '#e8e8e8', 512, 128), 0,0.0225,0, -Math.PI/2); }
       else ST(0.07,0.02, labelTex([{text: short, size:22}], '#1d2b3a', '#f0f0f0', 512, 128), 0,0.0105,0, -Math.PI/2);
+      break;
     }
     case 'hdd': {
       B(0.15,0.04,0.1,0x3a3f48,0,0.02,0);                      // 本体
@@ -1014,7 +1076,7 @@ function partModel(k){
 // 組み立て台のケース内での取り付け位置（ケースのローカル座標）
 const PLACE = {
   mb:[0,0.2,0], cpu:[-0.05,0.215,-0.04], cooler:[-0.05,0.2295,-0.04], ram:[0.1,0.205,0],
-  storage:[-0.1,0.215,0.14], gpu:[0,0.214,-0.14], psu:[0,0,-0.12], hdd:[0.12,0.5,0.05], fan:[0,0.6,0.22],
+  storage:[-0.1,0.215,0.14], gpu:[0,0.214,-0.14], psu:[0,0.01,-0.12], hdd:[0.12,0.5,0.05], fan:[0,0.6,0.22],
 };
 
 // 棚（左の壁）
@@ -1534,6 +1596,7 @@ function letterHTML(withAccept){
   return `<h3>注文メール（${S.orderIdx+1}件目）</h3>
     <p>差出人：<b>${o.client}</b>（職業：${o.job}）</p>
     <p>「${o.letter}」</p>
+    ${o.corpUnit ? `<p class="ok">法人依頼：全${o.unitTotal}台のうち ${o.unitNo}台目（期限 ${o.deadline}日目まで）</p>` : ''}
     <p>予算：<span class="gold">${yen(o.budget)}</span>　必要な性能：<b>${o.minPerf}</b> 以上</p>
     <p class="muted">予算内で、性能条件を満たす構成を組んで、動く状態で納品する。</p>` +
     (withAccept ? `<button class="btn primary" data-act="accept">この注文を受ける</button>` : '');
@@ -1748,7 +1811,7 @@ function objBuild(){
 const ACT = {
   resume(){ resumeGame(); },
   startBuild(){ if(checks().ready){ closePanel(); startBuild(); } else showReadiness(); },
-  accept(){ S.phase = 'shop'; SFX.click(); closePanel(); if(curO().repair){ startRepairWorld(); return say('修理を受けた。棚で故障した部品の代わりを選んで、組み立て台で交換しよう。'); } say('注文を受けた。左の棚から部品を選ぼう。'); },
+  accept(){ S.phase = 'shop'; SFX.click(); closePanel(); writeSave(); if(curO().repair){ startRepairWorld(); return say('修理を受けた。棚で故障した部品の代わりを選んで、組み立て台で交換しよう。'); } say('注文を受けた。左の棚から部品を選ぼう。'); },
   setPart(arg){
     const [k,id] = arg.split('|');
     if(S.repair && k !== S.repair.key){ SFX.error(); return say(`この修理で替えるのは「${LABEL[S.repair.key]}」だけ。`); }
@@ -1800,7 +1863,7 @@ const ACT = {
   takeRepair(){
     const c = REGC; if(!c || c.state !== 'wait') return closePanel();
     const rp = c.repair; rp.dropDay = S.day || 1; rp.deadline = rp.dropDay + rp.wantDays + (staffOf('repair') > 0 ? 1 : 0);
-    REPAIR_Q.push(rp); c.state = 'leave'; REGC = null;
+    REPAIR_Q.push(rp); c.state = 'leave'; REGC = null; persist();
     const rv = reviewFor(c); S.rep = Math.max(0, S.rep + rv.rep);
     SFX.click(); closePanel(); say(`修理を預かった（${rp.deadline}日目までに返す）。${rv.text}`);
   },
@@ -1863,19 +1926,44 @@ const ACT = {
   },
   nextOrder(){
     SFX.click();
+    const j = SAVE.corpJob, wasUnit = !!curO().corpUnit;
+    if(wasUnit && j){
+      j.done = (j.done || 0) + 1; j.left = j.qty - j.done;
+      if(j.left <= 0){ S.rep += 5; SAVE.corpJob = null; SAVE.corpNext = corpNextAfter(S.day || 1); say(`法人依頼「${j.client}」の全${j.qty}台を納品した！ 評判 +5`); }
+      persist();
+    }
     S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:S.day, dayIncome:S.dayIncome, dayExpense:S.dayExpense, orderIdx:S.orderIdx + 1});
     resetWorld();
+    const next = SAVE.corpJob;
+    if(next && (S.day || 1) <= next.deadline){ ORDERS[S.orderIdx] = corpUnitOrder(next); openOrder(); return; }
+    if(next) corpCancel('期限切れ');
+    openMissionChoice();
+  },
+  complaintAct(arg){
+    const ch = COMPLAINT_CHOICES[+arg], c = CUR_COMPLAINT || {};
+    if(ch.money){ S.money += ch.money; S.dayExpense = (S.dayExpense || 0) - ch.money; }
+    S.rep = Math.max(0, S.rep + ch.rep);
+    if(c.demo) SAVE.complaintSeen = true;
+    CUR_COMPLAINT = null; persist();
+    SFX.click(); closePanel(); say(ch.msg);
     openMissionChoice();
   },
   pickMission(arg){
-    const cand = MISSION_CANDS[+arg];
+    let cand = MISSION_CANDS[+arg];
+    if(cand.complaint){ return openComplaint(cand); }
+    if(cand.corpOffer){
+      SAVE.corpJob = {client:cand.client, job:cand.job, letter:cand.letter, unitBudget:cand.unitBudget, minPerf:cand.minPerf,
+        qty:cand.qty, done:0, left:cand.qty, deadline:(S.day || 1) + cand.days};
+      SAVE.corpOffer = null; persist();
+      cand = corpUnitOrder(SAVE.corpJob);
+    } else if(cand.corpActive){ cand = corpUnitOrder(SAVE.corpJob); }
     if(cand.repair){ const qi = REPAIR_Q.indexOf(cand); if(qi >= 0) REPAIR_Q.splice(qi, 1); }
     ORDERS[S.orderIdx] = cand;
     SFX.click(); openOrder();
   },
   restart(){
     SFX.click(); tutIdx = -1; ORDERS = [];
-    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; SAVE.day = 1; SAVE.profit = 0; SAVE.sales = 0; SAVE.m1m = false; SAVE.ledger = []; SAVE.isManager = false; SAVE.staff = {reg:0,restock:0,repair:0}; writeSave();
+    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; SAVE.day = 1; SAVE.profit = 0; SAVE.sales = 0; SAVE.m1m = false; SAVE.ledger = []; SAVE.isManager = false; SAVE.staff = {reg:0,restock:0,repair:0}; SAVE.corpJob = null; SAVE.corpOffer = null; SAVE.corpOfferDay = 0; SAVE.corpNext = 14; writeSave();
     dayClock = 0; dayEnding = false; lastDayRec = null;
     CUST.forEach(c => scene.remove(c.mesh)); CUST.length = 0; REGC = null; REPAIR_Q.length = 0; custTimer = 12;
     Object.keys(STOCK).forEach(k => delete STOCK[k]);
@@ -2157,13 +2245,14 @@ function repairBudget(key, cart, fee){
   const cost = minPart + minBox + minShip;
   return Math.max(fee + 4000, Math.ceil(cost * 1.5 / 100) * 100);
 }
-// 修理の支払い：期限内は+30%、1日遅れは据え置き、それ以上は段階的に減額（下限60%）
+// 修理の支払い：期限内は+30%、1日遅れは据え置き、2日遅れは1割減、3日以上は15%減
+// （予算は一番安い合う部品で黒字になるよう決めてあるので、この範囲の遅れなら赤字にならない）
 function repairPayout(budget, late){
-  const m = late <= 0 ? 1.3 : late === 1 ? 1 : Math.max(0.6, 1 - 0.25*(late-1));
+  const m = late <= 0 ? 1.3 : late === 1 ? 1 : late === 2 ? 0.9 : 0.85;
   return Math.round(budget * m);
 }
 function repairLateNote(late){
-  return late <= 0 ? '期限内に直したので報酬 +30%' : late === 1 ? '1日過ぎたが報酬は据え置き' : `期限を${late}日過ぎたので報酬を減額`;
+  return late <= 0 ? '期限内に直したので報酬 +30%' : late === 1 ? '1日過ぎたが報酬は据え置き' : late === 2 ? '2日過ぎたので報酬を1割減額' : `期限を${late}日過ぎたので報酬を15%減額`;
 }
 function makeRepairJob(){
   let tpl, cart, key, fee, budget;
@@ -2335,7 +2424,7 @@ function fbReady(){ return !!FIREBASE_CONFIG && typeof firebase !== 'undefined';
 function refreshContinue(){
   refreshStartButtons();
   const old = document.getElementById('contBtn'); if(old) old.remove();
-  if(!(SAVE.done > 0)) return;
+  if(!(SAVE.done > 0 || SAVE.started || SAVE.wip || (SAVE.repairQ || []).length)) return;
   const b = document.createElement('button');
   b.className = 'btn primary'; b.id = 'contBtn'; b.disabled = cloudLoading;
   b.textContent = `続きから（累計${SAVE.done}件・所持金 ${yen(SAVE.money)}）`;
@@ -2344,10 +2433,11 @@ function refreshContinue(){
   t.parentNode.insertBefore(b, t);
 }
 function saveCloud(){
-  if(!fbUser || !fbDb) return;
-  fbDb.collection('saves').doc(fbUser.uid).set({
+  if(!fbUser || !fbDb) return Promise.resolve();
+  saveWip();
+  return fbDb.collection('saves').doc(fbUser.uid).set({
     money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach, started: !!SAVE.started, profit: SAVE.profit || 0, sales: SAVE.sales || 0, m1m: !!SAVE.m1m,
-    ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, staff: SAVE.staff || {reg:0,restock:0,repair:0},
+    ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, complaintSeen: !!SAVE.complaintSeen, corpJob: SAVE.corpJob || null, corpOffer: SAVE.corpOffer || null, corpOfferDay: SAVE.corpOfferDay || 0, corpNext: SAVE.corpNext || 14, wip: SAVE.wip || null, repairQ: SAVE.repairQ || [], staff: SAVE.staff || {reg:0,restock:0,repair:0},
     updated: firebase.firestore.FieldValue.serverTimestamp()
   }, {merge:true}).catch(() => setAuthStatus('クラウド保存に失敗しました（通信を確認）'));
 }
@@ -2364,7 +2454,7 @@ async function loadCloud(){
     const d = await Promise.race([ref.get(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
     if(d.exists){
       const j = d.data();
-      SAVE = Object.assign(SAVE, {started:!!j.started, profit:j.profit||0, sales:j.sales||0, m1m:!!j.m1m, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, staff:j.staff || {reg:0,restock:0,repair:0}});
+      SAVE = Object.assign(SAVE, {started:!!j.started, profit:j.profit||0, sales:j.sales||0, m1m:!!j.m1m, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, complaintSeen:!!j.complaintSeen, corpJob:j.corpJob||null, corpOffer:j.corpOffer||null, corpOfferDay:j.corpOfferDay||0, corpNext:j.corpNext||14, wip:j.wip||null, repairQ:Array.isArray(j.repairQ)?j.repairQ:[], staff:j.staff || {reg:0,restock:0,repair:0}});
       writeSave();
     } else { resetSaveData(); saveCloud(); }
     setAuthStatus(`ログイン中：${fbUser.email}（クラウドに保存）`);
@@ -2521,7 +2611,6 @@ function initAuth(){
       if(u) loadCloud();
       else {
         cloudLoading = false;
-        if(wasIn) resetSaveData();
         refreshContinue();
         setAuthStatus('ログインしていません（この端末に保存します）');
       }
@@ -2532,7 +2621,7 @@ function initAuth(){
   upBtn.addEventListener('click', showSignup);
   document.getElementById('suSubmit').addEventListener('click', authSignUp);
   document.getElementById('suBack').addEventListener('click', () => { showLogin(); setAuthStatus(''); });
-  outBtn.addEventListener('click', () => { if(fbAuth) fbAuth.signOut(); });
+  outBtn.addEventListener('click', async () => { try{ await saveCloud(); }catch(e){} if(fbAuth) fbAuth.signOut(); });
 }
 initAuth();
 wireSettingsUI();
@@ -2541,7 +2630,31 @@ wireSettingsUI();
 const SAVE_KEY = 'pcws-save-v1';
 let SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, profit:0, sales:0, m1m:false, staff:{reg:0,restock:0,repair:0}};
 try{ const j = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if(j) SAVE = Object.assign(SAVE, j); }catch(e){}
-function writeSave(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); }catch(e){} }
+// 作業途中の注文（選んだ部品・箱・送料）と預かり中の修理を保存する。Firestoreに入れられる形にしておく
+function saveWip(){
+  const clean = v => JSON.parse(JSON.stringify(v));
+  const o = (gameStarted && S && curO) ? curO() : null;
+  const active = !!o && !!o.client && ['shop','build','pack','test'].includes(S.phase);
+  if(active && o.repair && S.repair){
+    SAVE.repairQ = clean(REPAIR_Q.concat([o])); SAVE.wip = null;   // 修理の途中は、預かり中の修理として戻す
+  } else {
+    SAVE.repairQ = clean(REPAIR_Q);
+    SAVE.wip = active ? clean({order:o, cart:S.cart, box:S.box, ship:S.ship}) : null;
+  }
+}
+function restoreProgress(){
+  REPAIR_Q.length = 0;
+  (Array.isArray(SAVE.repairQ) ? SAVE.repairQ : []).forEach(r => REPAIR_Q.push(r));
+  const w = SAVE.wip;
+  if(!w || !w.order) return false;
+  ORDERS[S.orderIdx] = w.order;
+  S.cart = Object.assign({}, w.cart || {}); S.box = w.box || null; S.ship = w.ship || null;
+  S.phase = 'shop';
+  rebuildPartsTable();
+  say(`前回の続き。作業中の注文：${w.order.client}（選んだ部品はそのまま。組み立ては最初からです）`);
+  return true;
+}
+function writeSave(){ saveWip(); try{ localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); }catch(e){} }
 function persist(){ SAVE.money = S.money; SAVE.rep = S.rep; SAVE.done = S.done || 0; SAVE.day = S.day || 1; writeSave(); saveCloud(); }
 function curO(){ return ORDERS[S.orderIdx] || {client:'', job:'', letter:'', budget:0, minPerf:0}; }
 const ACH = [
@@ -2556,14 +2669,75 @@ const ACH = [
   {id:'rich', name:'億万長者の卵', desc:'所持金が100万円を超える', ok:st => st.money >= 1000000},
 ];
 let MISSION_CANDS = [];
+// クレーム：10日目に店長が手本を見せ、以後はときどき自分が対応する
+const COMPLAINT_STORY = [
+  {client:'カズさん', letter:'先週組んでもらったPCが、3日で電源が勝手に落ちます！ 保証はどうなってるんですか！'},
+  {client:'ミホさん', letter:'ゲームをすると画面が固まります。説明と全然違うじゃないですか。'},
+  {client:'タカシさん', letter:'届いた箱が潰れていて、中のパーツに傷がありました。どう責任を取るんですか。'},
+];
+const COMPLAINT_CHOICES = [
+  {label:'誠心誠意謝って、無料で点検・修理を約束する（費用 −5,000円 / 評判 +1）', money:-5000, rep:1, msg:'無料の点検を約束した。お客さんは少し落ち着いた。'},
+  {label:'保証の内容を丁寧に説明して、納得してもらう（評判 ±0）', money:0, rep:0, msg:'保証の内容を説明した。お客さんは渋々うなずいた。'},
+  {label:'「お客様の使い方が原因では？」と返す（評判 −3）', money:0, rep:-3, msg:'強い言い方になってしまった。お客さんは帰ってしまった…'},
+];
+let CUR_COMPLAINT = null;
+function complaintCandidate(demo){
+  const s = COMPLAINT_STORY[Math.floor(Math.random()*COMPLAINT_STORY.length)];
+  return {complaint:true, demo, client:s.client, job:'クレーム', letter:s.letter, budget:0, minPerf:0};
+}
+function openComplaint(c){
+  CUR_COMPLAINT = c; SFX.click();
+  const demo = c.demo ? `<p><b>店長の対応</b>：店長は文句を最後まで聞いてから「ご不便をおかけしました」と頭を下げた。保証の期間と点検の流れをその場で説明し、お客さんは笑顔で帰った。「クレームはな、まず相手の話を全部聞くことだ」</p><p class="muted">今度はあなたが対応する番です。</p>` : '';
+  openPanel(`<h3>📣 クレーム：${c.client}</h3><p>「${c.letter}」</p>${demo}` +
+    COMPLAINT_CHOICES.map((ch,i) => `<button class="btn" data-act="complaintAct" data-arg="${i}">${ch.label}</button>`).join(''), false);
+}
+// ===== 法人依頼：台数3〜50、期限は受けた日から3〜30日（1ヶ月まで） =====
+function makeCorpOffer(){
+  const cs = ORDER_POOL.filter(o => o.corp);
+  const t = cs[Math.floor(Math.random()*cs.length)];
+  const qty = 3 + Math.floor(Math.random()*48);
+  const days = 3 + Math.floor(Math.random()*28);
+  const volume = qty >= 20 ? 0.9 : qty >= 10 ? 0.95 : 1;      // 台数が多いと1台あたりの単価を少し下げる（それでも民間より高い）
+  const unitBudget = Math.round(t.budget * 1.5 * volume / 1000) * 1000;   // 法人は民間より1台あたりの利益が高い
+  return {client:t.client, job:t.job, letter:t.letter, unitBudget, budget:unitBudget,
+    minPerf:t.minPerf, qty, days, corpOffer:true};
+}
+function corpUnitOrder(j){
+  return {client:j.client, job:j.job, letter:j.letter, budget:j.unitBudget, minPerf:j.minPerf,
+    corp:true, corpUnit:true, unitNo:(j.done || 0) + 1, unitTotal:j.qty, deadline:j.deadline};
+}
+// 法人依頼の次の日程：2週間ごと。依頼が終わった日の「翌週」の区切り（7日ごとの週末）から出し直す
+function corpNextAfter(d){ return (Math.floor((d - 1) / 7) + 2) * 7; }
+function corpCancel(reason){
+  if(!SAVE.corpJob) return;
+  S.rep = Math.max(0, S.rep - 3);
+  say(`法人依頼「${SAVE.corpJob.client}」を打ち切り：${reason}（評判 −3）`);
+  SAVE.corpJob = null; SAVE.corpNext = corpNextAfter(S.day || 1); persist();
+}
 function openMissionChoice(){
   SFX.open();
+  const day = S.day || 1;
+  if(SAVE.corpJob && day > SAVE.corpJob.deadline) corpCancel('期限切れ');
   const reps = REPAIR_Q.slice();
-  const orders = [...ORDER_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
-  MISSION_CANDS = [...reps, ...orders];
-  const btn = (o, i) => `<button class="btn" data-act="pickMission" data-arg="${i}"><b>${o.repair ? '🔧 ' : ''}${o.client}（${o.job}${o.repair && o.repair.deadline ? '・期限 ' + o.repair.deadline + '日目まで' : ''}）</b>　予算 <span class="gold">${yen(o.budget)}</span>　必要性能 ${o.minPerf}<br><span class="muted">「${o.letter}」</span></button>`;
+  // 法人依頼：受けている間は毎回その1台目（残り台数）を出す。なければ7日ごとに新しい依頼を1件出す
+  let corp = null;
+  if(SAVE.corpJob) corp = {...corpUnitOrder(SAVE.corpJob), corpActive:true};
+  else if(day >= (SAVE.corpNext || 14) && SAVE.corpOfferDay !== day){
+    SAVE.corpOffer = makeCorpOffer(); SAVE.corpOfferDay = day; SAVE.corpNext = day + 14; persist();
+  }
+  if(!corp && SAVE.corpOfferDay === day && SAVE.corpOffer) corp = {...SAVE.corpOffer};
+  let complaint = null;
+  if(day >= 10 && !SAVE.complaintSeen) complaint = complaintCandidate(true);
+  else if(day >= 10 && Math.random() < 0.3) complaint = complaintCandidate(false);
+  const normal = ORDER_POOL.filter(o => !o.corp).sort(() => Math.random() - 0.5);
+  const orders = normal.slice(0, 3 - (complaint ? 1 : 0));
+  const pool = [...(complaint ? [complaint] : []), ...(corp ? [corp] : []), ...orders];
+  MISSION_CANDS = [...reps, ...pool];
+  const btn = (o, i) => o.complaint
+    ? `<button class="btn" data-act="pickMission" data-arg="${i}"><b>📣 クレーム（${o.client}）</b><br><span class="muted">「${o.letter}」</span></button>`
+    : `<button class="btn" data-act="pickMission" data-arg="${i}"><b>${o.repair ? '🔧 ' : ''}${o.corp ? '🏢 ' : ''}${o.client}（${o.job}${o.repair && o.repair.deadline ? '・期限 ' + o.repair.deadline + '日目まで' : ''}${o.corpOffer ? '・全' + o.qty + '台・' + o.days + '日以内' : ''}${o.corpActive ? '・残り' + SAVE.corpJob.left + '台・' + SAVE.corpJob.deadline + '日目まで' : ''}）</b>　予算 <span class="gold">${yen(o.budget)}</span>　必要性能 ${o.minPerf}<br><span class="muted">「${o.letter}」</span></button>`;
   const repHtml = reps.length ? reps.map((o, i) => btn(o, i)).join('') : '<p class="muted">預かっている修理はありません。</p>';
-  const ordHtml = orders.map((o, i) => btn(o, reps.length + i)).join('');
+  const ordHtml = pool.map((o, j) => btn(o, reps.length + j)).join('');
   openPanel(`<h3>次の任務を選ぶ</h3><p class="muted">預かり中の修理と、組み立ての注文から好きなものを選べます。</p>` +
     `<p><b>🔧 修理（預かり中 ${reps.length}件）</b></p>` + repHtml +
     `<p><b>📦 組み立ての注文</b></p>` + ordHtml +
@@ -2584,7 +2758,7 @@ function startGame(withTut, cont){
   document.getElementById('start').style.display = 'none';
   if(cont){ S = Object.assign(newState(), {money:SAVE.money, rep:SAVE.rep, done:SAVE.done, day:SAVE.day || 1}); tutIdx = -1; }
   else tutIdx = withTut ? 0 : -1;
-  if(cont){ gameStarted = true; openMissionChoice(); }
+  if(cont){ gameStarted = true; if(!restoreProgress()) openMissionChoice(); }
   else { introIdx = 0; showIntro(); }
   if(withTut) showTut();
 }
@@ -2783,7 +2957,7 @@ function loop(t){
 
   document.getElementById('obj').textContent = '目標：' + objective();
   document.getElementById('stat').textContent = `所持金 ${yen(S.money)}　店の利益 ${yen(SAVE.profit || 0)}　評判 ${S.rep}　${S.day || 1}日目　累計 ${S.done || 0}件　損傷 ${S.damage}`;
-  { const p = projection(); document.getElementById('total').textContent = `選んだパーツ合計 ${yen(total())} ／ 予算 ${yen(curO().budget)}　｜　見込み：${p.base >= 0 ? '黒字 +' : '赤字 −'}${yen(Math.abs(p.base))}　｜　${psuHud()}`; }
+  { const p = projection(); document.getElementById('total').textContent = `${S.repair ? `交換部品 ${yen(total())} ／ 修理の報酬 ${yen(curO().budget)}` : `選んだパーツ合計 ${yen(total())} ／ 予算 ${yen(curO().budget)}`}　｜　見込み：${p.base >= 0 ? '黒字 +' : '赤字 −'}${yen(Math.abs(p.base))}　｜　${psuHud()}`; }
 
   updateTarget();
   const near = uiOpen ? null : nearest();
