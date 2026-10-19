@@ -105,6 +105,7 @@ canvas{display:block;touch-action:none}
   <div id="settingsView" style="display:none;text-align:left">
     <b style="display:block;text-align:center">⚙ 設定</b>
     <p id="setAcct" class="muted" style="margin:8px 0"></p>
+    <label style="display:block;margin:8px 0;cursor:pointer"><input type="checkbox" id="setFps"> FPS表示（画面の左上に表示）</label>
     <div id="setLoggedIn" style="display:none">
       <button class="btn" id="setPw">パスワードを再設定する（メールを送ります）</button>
       <p style="font-size:13px;margin:8px 0 2px">アカウント削除：確認のため現在のパスワードを入力してください</p>
@@ -2254,10 +2255,37 @@ function repairPayout(budget, late){
 function repairLateNote(late){
   return late <= 0 ? '期限内に直したので報酬 +30%' : late === 1 ? '1日過ぎたが報酬は据え置き' : late === 2 ? '2日過ぎたので報酬を1割減額' : `期限を${late}日過ぎたので報酬を15%減額`;
 }
+// 修理するPCの構成を、部品の組み合わせが合う範囲でランダムに作る（CPU・マザボ・メモリ・ケース・電源・クーラーなど）
+function randomRepairTpl(){
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const ok = a => a.filter(p => !/サーバー/.test(p.name));
+  for(let t = 0; t < 300; t++){
+    const cpu = pick(ok(PARTS.cpu));
+    const mbs = PARTS.mb.filter(m => m.socket === cpu.socket); if(!mbs.length) continue;
+    const mb = pick(mbs);
+    const rams = PARTS.ram.filter(r => r.type === mb.ram); if(!rams.length) continue;
+    const ram = pick(rams);
+    const cases = PARTS.case.filter(c => c.ff.includes(mb.ff)); if(!cases.length) continue;
+    const cs = pick(cases);
+    let gpu = null;
+    if(!cpu.igpu || Math.random() < 0.7){
+      const gs = PARTS.gpu.filter(g => g.len <= cs.maxGpu); if(!gs.length) continue;
+      gpu = pick(gs);
+    }
+    const need = cpu.tdp + (gpu ? gpu.tdp : 0) + 80;
+    const psus = PARTS.psu.filter(p => p.watt >= need && p.watt <= need + 400); if(!psus.length) continue;
+    const coolers = PARTS.cooler.filter(c => c.sockets.includes(cpu.socket) && cpu.tdp <= c.maxTdp); if(!coolers.length) continue;
+    const cart = {cpu:cpu.id, mb:mb.id, ram:ram.id, psu:pick(psus).id, case:cs.id, cooler:pick(coolers).id, storage:pick(ok(PARTS.storage)).id};
+    if(gpu) cart.gpu = gpu.id;
+    const m = {}; CAT.forEach(c => { const id = cart[c.key]; m[c.key] = id ? PARTS[c.key].find(p => p.id === id) : undefined; });
+    if(compatOK(m)) return cart;
+  }
+  return REPAIR_TPL[Math.floor(Math.random() * REPAIR_TPL.length)];
+}
 function makeRepairJob(){
   let tpl, cart, key, fee, budget;
   for(let tries = 0; tries < 50; tries++){
-    tpl = REPAIR_TPL[Math.floor(Math.random()*REPAIR_TPL.length)];
+    tpl = randomRepairTpl();
     cart = Object.assign({}, tpl);
     const keys = Object.keys(cart).filter(k => k !== 'case' && SYMPTOM[k]);
     key = keys[Math.floor(Math.random()*keys.length)];
@@ -2437,7 +2465,7 @@ function saveCloud(){
   saveWip();
   return fbDb.collection('saves').doc(fbUser.uid).set({
     money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach, started: !!SAVE.started, profit: SAVE.profit || 0, sales: SAVE.sales || 0, m1m: !!SAVE.m1m,
-    ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, complaintSeen: !!SAVE.complaintSeen, corpJob: SAVE.corpJob || null, corpOffer: SAVE.corpOffer || null, corpOfferDay: SAVE.corpOfferDay || 0, corpNext: SAVE.corpNext || 14, wip: SAVE.wip || null, repairQ: SAVE.repairQ || [], staff: SAVE.staff || {reg:0,restock:0,repair:0},
+    ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, complaintSeen: !!SAVE.complaintSeen, corpJob: SAVE.corpJob || null, corpOffer: SAVE.corpOffer || null, corpOfferDay: SAVE.corpOfferDay || 0, corpNext: SAVE.corpNext || 14, wip: SAVE.wip || null, repairQ: SAVE.repairQ || [], clock: SAVE.clock || null, staff: SAVE.staff || {reg:0,restock:0,repair:0},
     updated: firebase.firestore.FieldValue.serverTimestamp()
   }, {merge:true}).catch(() => setAuthStatus('クラウド保存に失敗しました（通信を確認）'));
 }
@@ -2454,7 +2482,7 @@ async function loadCloud(){
     const d = await Promise.race([ref.get(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
     if(d.exists){
       const j = d.data();
-      SAVE = Object.assign(SAVE, {started:!!j.started, profit:j.profit||0, sales:j.sales||0, m1m:!!j.m1m, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, complaintSeen:!!j.complaintSeen, corpJob:j.corpJob||null, corpOffer:j.corpOffer||null, corpOfferDay:j.corpOfferDay||0, corpNext:j.corpNext||14, wip:j.wip||null, repairQ:Array.isArray(j.repairQ)?j.repairQ:[], staff:j.staff || {reg:0,restock:0,repair:0}});
+      SAVE = Object.assign(SAVE, {started:!!j.started, profit:j.profit||0, sales:j.sales||0, m1m:!!j.m1m, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, complaintSeen:!!j.complaintSeen, corpJob:j.corpJob||null, corpOffer:j.corpOffer||null, corpOfferDay:j.corpOfferDay||0, corpNext:j.corpNext||14, wip:j.wip||null, repairQ:Array.isArray(j.repairQ)?j.repairQ:[], clock:j.clock||null, staff:j.staff || {reg:0,restock:0,repair:0}});
       writeSave();
     } else { resetSaveData(); saveCloud(); }
     setAuthStatus(`ログイン中：${fbUser.email}（クラウドに保存）`);
@@ -2545,6 +2573,7 @@ function showSettings(fromGame){
   document.getElementById('start').style.display = 'flex';
   document.getElementById('mainView').style.display = 'none';
   document.getElementById('settingsView').style.display = 'block';
+  document.getElementById('setFps').checked = fpsOn();
   refreshSettings();
 }
 function hideSettings(){
@@ -2632,7 +2661,10 @@ let SAVE = {money:0, rep:0, done:0, ach:[], ledger:[], isManager:false, profit:0
 try{ const j = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if(j) SAVE = Object.assign(SAVE, j); }catch(e){}
 // 作業途中の注文（選んだ部品・箱・送料）と預かり中の修理を保存する。Firestoreに入れられる形にしておく
 function saveWip(){
+  // ゲームを続けていないとき（ログイン直後など）は、読み込んだ保存データをそのまま残す
+  if(!gameStarted) return;
   const clean = v => JSON.parse(JSON.stringify(v));
+  SAVE.clock = {c: Math.round(dayClock * 10) / 10, inc: S.dayIncome || 0, exp: S.dayExpense || 0};
   const o = (gameStarted && S && curO) ? curO() : null;
   const active = !!o && !!o.client && ['shop','build','pack','test'].includes(S.phase);
   if(active && o.repair && S.repair){
@@ -2752,11 +2784,20 @@ function showAch(){
 document.getElementById('achBtn').addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); showAch(); });
 refreshContinue();
 
+if(typeof setInterval === 'function'){
+  setInterval(() => { if(gameStarted) writeSave(); }, 10000);
+  setInterval(() => { if(gameStarted && fbUser) saveCloud(); }, 60000);
+}
 function startGame(withTut, cont){
   ensureAudio();
   if(!SAVE.started){ SAVE.started = true; writeSave(); saveCloud(); }
   document.getElementById('start').style.display = 'none';
-  if(cont){ S = Object.assign(newState(), {money:SAVE.money, rep:SAVE.rep, done:SAVE.done, day:SAVE.day || 1}); tutIdx = -1; }
+  if(cont){
+    S = Object.assign(newState(), {money:SAVE.money, rep:SAVE.rep, done:SAVE.done, day:SAVE.day || 1,
+      dayIncome: (SAVE.clock && SAVE.clock.inc) || 0, dayExpense: (SAVE.clock && SAVE.clock.exp) || 0});
+    dayClock = (SAVE.clock && SAVE.clock.c) || 0; dayEnding = false;
+    tutIdx = -1;
+  }
   else tutIdx = withTut ? 0 : -1;
   if(cont){ gameStarted = true; if(!restoreProgress()) openMissionChoice(); }
   else { introIdx = 0; showIntro(); }
@@ -2932,8 +2973,24 @@ let last = performance.now();
 let touchAct = false, screwHold = 0;
 const promptEl = document.getElementById('prompt');
 let tutShown = -2;
+// FPS表示（設定でオン・オフ。この端末だけに覚えておく）
+const FPS_KEY = 'pcws-fps';
+const fpsEl = document.createElement('div');
+fpsEl.style.cssText = 'position:fixed;left:8px;top:8px;z-index:50;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.55);color:#9fe6b0;font:12px monospace;pointer-events:none;display:none';
+document.body.appendChild(fpsEl);
+function fpsOn(){ try{ return localStorage.getItem(FPS_KEY) === '1'; }catch(e){ return false; } }
+function setFpsOn(on){ try{ localStorage.setItem(FPS_KEY, on ? '1' : '0'); }catch(e){} fpsEl.style.display = on ? 'block' : 'none'; }
+let fpsLast = 0, fpsN = 0, fpsSum = 0;
+function fpsTick(t){
+  if(!fpsLast){ fpsLast = t; return; }
+  const d = (t - fpsLast) / 1000; fpsLast = t; fpsN++; fpsSum += d;
+  if(fpsSum >= 0.5){ fpsEl.textContent = 'FPS ' + Math.round(fpsN / fpsSum); fpsN = 0; fpsSum = 0; }
+}
+document.getElementById('setFps').addEventListener('change', e => setFpsOn(e.target.checked));
+setFpsOn(fpsOn());
 function loop(t){
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
+  if(fpsEl.style.display !== 'none') fpsTick(t);
   if(!uiOpen && !paused) move(dt);
   if(gameStarted && !paused && !dayEnding){
     updateCustomers(dt);
