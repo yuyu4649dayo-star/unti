@@ -1757,6 +1757,13 @@ function fitReport(o){
 function finish(){
   if(!S.ship) return;
   const sh = SHIP[S.ship], o = curO();
+  // 法人の1台は出荷の時点で数える（ここで数えておけば、結果画面の途中で日が終わっても同じ台が戻らない）
+  if(o.corpUnit && SAVE.corpJob && !o.counted){
+    o.counted = true;
+    const j = SAVE.corpJob; j.done = (j.done || 0) + 1; j.left = j.qty - j.done;
+    if(j.left <= 0){ S.rep += 5; SAVE.corpJob = null; SAVE.corpNext = corpNextAfter(S.day || 1); say(`法人依頼「${j.client}」の全${j.qty}台を納品した！ 評判 +5`); }
+    persist();
+  }
   S.shock = !sh.ins && Math.random() < 0.2;
   const parts = (o.repair && S.repair) ? ((PARTS[S.repair.key].find(p => p.id === S.cart[S.repair.key]) || {price:0}).price) : total();
   let q = 100 - S.damage*8 - S.packMiss*10 - S.testFail*12 - (S.shock ? 20 : 0);
@@ -1919,7 +1926,7 @@ function interactables(){
   const ph = S.phase;
   add(11.2, 9.5, 2.0, '出口（帰る）', openExit);
   add(10.5, -8.6, 2.2, '店長に話しかける', managerTalk);
-  if(waitingCust()) add(0, 6.6, 2.4, 'レジ（お客さんに対応）', openRegister);
+  if(waitingCust() && !SAVE.corpJob) add(0, 6.6, 2.4, 'レジ（お客さんに対応）', openRegister);
   if(S.repair && !S.repair.done && !held && partGroups[S.repair.key] && partGroups[S.repair.key].visible)
     add(partGroups[S.repair.key].position.x, partGroups[S.repair.key].position.z, 1.1, `${LABEL[S.repair.key]}の代わりを持つ`, () => pickPart(S.repair.key));
   if(S.repair && !S.repair.done && held && held.type === 'part' && held.key === S.repair.key)
@@ -2139,12 +2146,6 @@ const ACT = {
   },
   nextOrder(){
     SFX.click();
-    const j = SAVE.corpJob, wasUnit = !!curO().corpUnit;
-    if(wasUnit && j){
-      j.done = (j.done || 0) + 1; j.left = j.qty - j.done;
-      if(j.left <= 0){ S.rep += 5; SAVE.corpJob = null; SAVE.corpNext = corpNextAfter(S.day || 1); say(`法人依頼「${j.client}」の全${j.qty}台を納品した！ 評判 +5`); }
-      persist();
-    }
     S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:S.day, dayIncome:S.dayIncome, dayExpense:S.dayExpense, orderIdx:S.orderIdx + 1});
     resetWorld();
     const next = SAVE.corpJob;
@@ -2395,16 +2396,17 @@ function ownerFires(){
     <button class="btn primary" data-act="ownerNext">……</button>`, false);
 }
 function autoServe(c){
+  const who = staffOf('reg') > 0 ? 'レジ係' : '店長';
   if(c.kind === 'buy'){
     const pid = c.item.part.id;
     if(stockOf(pid) > 0){
       stockAdd(pid, -1); S.money += c.item.part.price;
       S.dayIncome = (S.dayIncome || 0) + c.item.part.price; S.dayExpense = (S.dayExpense || 0) + Math.round(c.item.part.price * 0.75);
-      say(`レジ係が${c.item.part.name}を販売した。`);
+      say(`${who}が${c.item.part.name}を販売した。`);
     }
   } else {
     const rp = c.repair; rp.dropDay = S.day || 1; rp.deadline = rp.dropDay + rp.wantDays + (staffOf('repair') > 0 ? 1 : 0);
-    REPAIR_Q.push(rp); say('レジ係が修理を預かった。');
+    REPAIR_Q.push(rp); say(`${who}が修理を預かった。`);
   }
   c.state = 'leave'; if(REGC === c) REGC = null;
 }
@@ -2607,6 +2609,7 @@ function updateCustomers(dt){
       c.waited = (c.waited || 0) + dt;
       applyMood(c, Math.min(1, c.waited / 30));
       if(staffOf('reg') > 0 && c.waited >= 8){ autoServe(c); }
+      else if(SAVE.corpJob && c.waited >= 3){ autoServe(c); }   // 法人の作業中は店長がレジに出る
       if(c.waited >= 20){
         c.bellT = (c.bellT ?? 0) - dt;
         if(c.bellT <= 0){ SFX.bell(); c.rings = (c.rings || 0) + 1; c.bellT = 12; say('チリンチリン！ レジでお客さんがベルを鳴らしている。'); }
