@@ -84,6 +84,7 @@ canvas{display:block;touch-action:none}
         <input class="inp" id="authPw" type="password" placeholder="パスワード" autocomplete="current-password">
         <div style="display:flex;gap:8px"><button class="btn" id="authIn" style="flex:1">ログイン</button><button class="btn" id="authUp" style="flex:1">新規登録の画面へ</button></div>
         <button class="btn" id="authForgot" style="font-size:13px">パスワードを忘れた場合</button>
+        <button class="btn" id="authLink" style="font-size:13px">メールでログイン（パスワードなし）</button>
       </div>
       <div id="acctView" style="display:none">
         <p id="acctText" style="margin:4px 0;font-weight:bold"></p>
@@ -1225,7 +1226,7 @@ const tileC = document.createElement('canvas'); tileC.width = 256; tileC.height 
   g.strokeStyle = '#3a3f4d'; g.lineWidth = 3; g.strokeRect(0,0,256,256); }
 const floorTex = new THREE.CanvasTexture(tileC);
 floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(12,12);
-{ const fl = new THREE.Mesh(new THREE.BoxGeometry(24,0.1,24), new THREE.MeshLambertMaterial({map: floorTex})); fl.position.set(0,-0.05,0); scene.add(fl); }
+const FLOOR_MESH = new THREE.Mesh(new THREE.BoxGeometry(24,0.1,24), new THREE.MeshLambertMaterial({map: floorTex})); FLOOR_MESH.position.set(0,-0.05,0); scene.add(FLOOR_MESH);
 // 壁（クロス＋腰板）
 const wallC = document.createElement('canvas'); wallC.width = 256; wallC.height = 256;
 { const g = wallC.getContext('2d'); g.fillStyle = '#2e3550'; g.fillRect(0,0,256,256);
@@ -1457,6 +1458,58 @@ addBox(0.6,0.5,0.6,0xc89b5b,7,1.15,-3.4);
 [[0,8.2,'レジ'],[11.4,2.9,'出口'],[-2,2.9,'入口'],[-3,-6,'注文・組み立ての準備'],[-4,0,'部品台（ここから取る）'],[2,0,'組み立て台'],[5,3,'梱包台'],[7,-4,'ダンボール'],[8,5,'配送カウンター']].forEach(([x,z,t]) => {
   const s = label(t); s.position.set(x, 2.3, z); s.scale.set(2.2, 0.55, 1); scene.add(s);
 });
+// 改装ショップの店先（入口の近く・左奥）：木製の店構え・ストライプのひさし・看板・棚の見本
+// 店構えは1つのグループにまとめ、部屋の中央（+x方向）を向くように回転させて配置する
+{ const sx = -7, sz = 10;
+  const G = new THREE.Group(); G.position.set(sx, 0, sz); G.rotation.y = Math.PI / 2; scene.add(G);
+  const WOOD = 0x6b4a2e, DARK = 0x3a2a1c, CREAM = 0xf4ead6, GREEN = 0x2fbf7f, WHITE = 0xffffff, SHELF = 0xc89b64;
+  const B = (w, h, d, c, x, y, z) => addBox(w, h, d, c, x, y, z, G);   // グループ内（ローカル座標）に箱を置く
+  // 背面パネル・棚・両側の枠
+  B(2.4, 2.3, 0.12, DARK, 0, 1.15, -0.55);
+  B(0.06, 2.3, 0.34, WOOD, -1.13, 1.15, -0.45);
+  B(0.06, 2.3, 0.34, WOOD, 1.13, 1.15, -0.45);
+  for (const yy of [1.0, 1.6]) {
+    B(2.2, 0.06, 0.3, SHELF, 0, yy, -0.45);                          // 棚板
+    B(0.05, 0.14, 0.22, DARK, -0.9, yy - 0.1, -0.5);                 // ブラケット
+    B(0.05, 0.14, 0.22, DARK, 0.9, yy - 0.1, -0.5);
+  }
+  // 棚の上の家具の見本（棚板の上面に乗る高さ）
+  B(0.5, 0.25, 0.25, 0x4f7fb8, -0.6, 1.155, -0.4);                   // ソファ風（青）
+  B(0.4, 0.2, 0.25, 0xb55a3c, 0.6, 1.13, -0.4);                      // 椅子風（赤）
+  B(0.12, 0.3, 0.12, 0xe8c36a, 0, 1.18, -0.4);                       // スタンドライト（黄）
+  B(0.22, 0.08, 0.12, 0xe8c36a, 0, 1.34, -0.4);                      // ランプの笠
+  B(0.25, 0.3, 0.25, 0x3f8f4f, -0.5, 1.78, -0.4);                    // 観葉植物（緑）
+  B(0.35, 0.2, 0.25, 0x8a5cc7, 0.5, 1.73, -0.4);                     // クッション（紫）
+  // カウンター（本体・天板・前面の飾り帯）
+  B(2.0, 0.9, 0.9, WOOD, 0, 0.45, 0);
+  B(2.1, 0.07, 1.0, CREAM, 0, 0.935, 0);
+  B(1.9, 0.12, 0.04, GREEN, 0, 0.8, 0.47);
+  // カウンターの上の商品（塗料缶・パンフレット）
+  B(0.22, 0.18, 0.22, GREEN, -0.5, 1.06, 0);
+  B(0.22, 0.18, 0.22, 0xe0557a, 0.1, 1.06, 0);
+  B(0.4, 0.02, 0.3, WHITE, 0.6, 0.98, 0);
+  // 柱とストライプのひさし
+  B(0.08, 2.3, 0.08, DARK, -1.0, 1.15, 0.35);
+  B(0.08, 2.3, 0.08, DARK, 1.0, 1.15, 0.35);
+  for (let i = 0; i < 6; i++) {
+    const col = i % 2 === 0 ? GREEN : WHITE;
+    B(2.2 / 6, 0.12, 1.2, col, -1.1 + (i + 0.5) * (2.2 / 6), 2.36, 0.2);
+  }
+  // 看板（照明に左右されないよう平面で表示）
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 128;
+  const cg = cv.getContext('2d');
+  cg.fillStyle = '#3a2a1c'; cg.fillRect(0, 0, 512, 128);
+  cg.strokeStyle = '#2fbf7f'; cg.lineWidth = 6; cg.strokeRect(6, 6, 500, 116);
+  cg.fillStyle = '#f4ead6'; cg.font = 'bold 56px sans-serif'; cg.textAlign = 'center'; cg.textBaseline = 'middle';
+  cg.fillText('改装ショップ', 256, 58);
+  cg.font = 'bold 26px sans-serif'; cg.fillStyle = '#2fbf7f';
+  cg.fillText('家具・床・壁', 256, 102);
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.55),
+    new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(cv), side: THREE.DoubleSide}));
+  sign.position.set(0, 0.75 + 2.0, 0.42); G.add(sign);
+  // 当たり判定（回転後のワールド座標）
+  OBST.push({x0: sx - 0.6, x1: sx + 0.9, z0: sz - 1.15, z1: sz + 1.15});
+}
 
 // ===== 組み立て中のケース =====
 const caseGroup = new THREE.Group();
@@ -1923,8 +1976,10 @@ function openShelf(k){
 // ===== インタラクト =====
 function interactables(){
   const L = []; const add = (x,z,r,text,fn) => L.push({x,z,r,text,fn});
+  if(DECO_HELD) return [];
   const ph = S.phase;
   add(11.2, 9.5, 2.0, '出口（帰る）', openExit);
+  add(-7, 10, 2.6, '改装ショップ（家具・床・壁）', openDecoShop);
   add(10.5, -8.6, 2.2, '店長に話しかける', managerTalk);
   if(waitingCust() && !SAVE.corpJob) add(0, 6.6, 2.4, 'レジ（お客さんに対応）', openRegister);
   if(S.repair && !S.repair.done && !held && partGroups[S.repair.key] && partGroups[S.repair.key].visible)
@@ -2074,14 +2129,14 @@ const ACT = {
     if(stockOf(pid) <= 0){ SFX.error(); return closePanel(); }
     stockAdd(pid, -1); S.money += c.item.part.price; S.dayIncome = (S.dayIncome || 0) + c.item.part.price; S.dayExpense = (S.dayExpense || 0) + Math.round(c.item.part.price * 0.75);
     c.state = 'leave'; REGC = null;
-    const rv = reviewFor(c); S.rep = Math.max(0, S.rep + rv.rep);
+    const rv = reviewFor(c); S.rep = S.rep + rv.rep;
     SFX.cash(); persist(); closePanel(); say(`${c.item.part.name}を販売した（${yen(c.item.part.price)}）。${rv.text}`);
   },
   takeRepair(){
     const c = REGC; if(!c || c.state !== 'wait') return closePanel();
     const rp = c.repair; rp.dropDay = S.day || 1; rp.deadline = rp.dropDay + rp.wantDays + (staffOf('repair') > 0 ? 1 : 0);
     REPAIR_Q.push(rp); c.state = 'leave'; REGC = null; persist();
-    const rv = reviewFor(c); S.rep = Math.max(0, S.rep + rv.rep);
+    const rv = reviewFor(c); S.rep = S.rep + rv.rep;
     SFX.click(); closePanel(); say(`修理を預かった（${rp.deadline}日目までに返す）。${rv.text}`);
   },
   custLeave(){ const c = REGC; if(c) c.state = 'leave'; REGC = null; SFX.click(); closePanel(); },
@@ -2094,18 +2149,20 @@ const ACT = {
     CUST.forEach(c => scene.remove(c.mesh)); CUST.length = 0; REGC = null; custTimer = 12;
     const nd = (S.day || 1) + 1;
     for(let i = REPAIR_Q.length-1; i >= 0; i--){
-      if(nd > REPAIR_Q[i].deadline + 1){ REPAIR_Q.splice(i,1); S.rep = Math.max(0, S.rep - 1); }
+      if(nd > REPAIR_Q[i].deadline + 1){ REPAIR_Q.splice(i,1); S.rep = S.rep - 1; }
     }
     dayEnding = false; lastDayRec = null;
     if(carry){
       S.day = nd; S.dayIncome = 0; S.dayExpense = 0;
       closePanel(); persist();
+      checkMgrRehire(nd);
       if(Math.random() < 0.25) startMgrHelp();
       say(`${nd}日目。昨日の作業の続きから始めよう。`);
       return;
     }
     S = Object.assign(newState(), {money:S.money, rep:S.rep, done:S.done, day:nd});
     resetWorld(); persist(); openMissionChoice();
+    checkMgrRehire(nd);
     if(Math.random() < 0.25) startMgrHelp();
     say(`${nd}日目。期限の近い修理から確認しよう。`);
   },
@@ -2156,7 +2213,7 @@ const ACT = {
   complaintAct(arg){
     const ch = COMPLAINT_CHOICES[+arg], c = CUR_COMPLAINT || {};
     if(ch.money){ S.money += ch.money; S.dayExpense = (S.dayExpense || 0) - ch.money; }
-    S.rep = Math.max(0, S.rep + ch.rep);
+    S.rep = S.rep + ch.rep;
     if(c.demo) SAVE.complaintSeen = true;
     CUR_COMPLAINT = null; persist();
     SFX.click(); closePanel(); say(ch.msg);
@@ -2177,7 +2234,7 @@ const ACT = {
   },
   restart(){
     SFX.click(); tutIdx = -1; ORDERS = [];
-    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; SAVE.day = 1; SAVE.profit = 0; SAVE.sales = 0; SAVE.m1m = false; SAVE.ledger = []; SAVE.isManager = false; SAVE.staff = {reg:0,restock:0,repair:0}; SAVE.corpJob = null; SAVE.corpOffer = null; SAVE.corpOfferDay = 0; SAVE.corpNext = 14; writeSave();
+    SAVE.money = 0; SAVE.rep = 0; SAVE.done = 0; SAVE.day = 1; SAVE.profit = 0; SAVE.sales = 0; SAVE.m1m = false; SAVE.ledger = []; SAVE.isManager = false; SAVE.staff = {reg:0,restock:0,repair:0}; SAVE.corpJob = null; SAVE.corpOffer = null; SAVE.corpOfferDay = 0; SAVE.corpNext = 14; SAVE.deco = []; SAVE.theme = {}; writeSave();
     dayClock = 0; dayEnding = false; lastDayRec = null;
     CUST.forEach(c => scene.remove(c.mesh)); CUST.length = 0; REGC = null; REPAIR_Q.length = 0; custTimer = 12;
     Object.keys(STOCK).forEach(k => delete STOCK[k]);
@@ -2309,6 +2366,14 @@ const SALARY = {reg:120000, restock:100000, repair:150000};
 const STAFF_NAME = {reg:'レジ係', restock:'補充係', repair:'修理係'};
 const STAFF_DESC = {reg:'お客さんを自動で接客（売上あり）', restock:'在庫の補充が早くなる', repair:'修理の期限が1日のびる'};
 function staffOf(k){ return (SAVE.staff && SAVE.staff[k]) || 0; }
+// 解雇から4日後、元店長が店員（レジ係）として再雇用される
+function checkMgrRehire(nd){
+  if(!SAVE.mgrFiredDay || SAVE.mgrRehired || nd < SAVE.mgrFiredDay + 4) return;
+  SAVE.mgrRehired = true;
+  SAVE.staff = SAVE.staff || {reg:0,restock:0,repair:0};
+  SAVE.staff.reg = (SAVE.staff.reg || 0) + 1; persist();
+  say('元店長が店員として再雇用された（レジ係として出勤）。');
+}
 function restockPeriod(){ return Math.max(10, 30 - 7*staffOf('restock')); }
 function updateClock(){
   const el = document.getElementById('clock'); if(!el) return;
@@ -2390,6 +2455,7 @@ function startBgm(){
 function stopBgm(){ if(bgmTimer){ clearInterval(bgmTimer); bgmTimer = null; } }
 function ownerFires(){
   startBgm(); SFX.open();
+  SAVE.mgrFiredDay = S.day || 1; persist();   // 解雇の日を記録（4日後に店員として再雇用）
   openPanel(`<h3>📢 オーナー来店</h3>
     <p>（とんとこ…と陽気な音楽が流れる）</p>
     <p>オーナー「おい、店長！ 君、最近ろくに働いてないそうだな。解雇だ！」</p>
@@ -2609,12 +2675,12 @@ function updateCustomers(dt){
       c.waited = (c.waited || 0) + dt;
       applyMood(c, Math.min(1, c.waited / 30));
       if(staffOf('reg') > 0 && c.waited >= 8){ autoServe(c); }
-      else if(SAVE.corpJob && c.waited >= 3){ autoServe(c); }   // 法人の作業中は店長がレジに出る
+      else if(SAVE.corpJob && c.waited >= 3){ startMgrCover(c); }   // 法人の作業中は店長がレジに出る（歩いて行って対応）
       if(c.waited >= 20){
         c.bellT = (c.bellT ?? 0) - dt;
         if(c.bellT <= 0){ SFX.bell(); c.rings = (c.rings || 0) + 1; c.bellT = 12; say('チリンチリン！ レジでお客さんがベルを鳴らしている。'); }
       }
-      if(c.wait <= 0){ c.state = 'leave'; S.rep = Math.max(0, S.rep - 1); say('お客さんが待ちきれず帰ってしまった…（評判 -1）'); }
+      if(c.wait <= 0){ c.state = 'leave'; S.rep = S.rep - 1; say('お客さんが待ちきれず帰ってしまった…（評判 -1）'); }
     }
   }
 }
@@ -2720,7 +2786,7 @@ function saveCloud(){
   saveWip();
   return fbDb.collection('saves').doc(fbUser.uid).set({
     money: SAVE.money, rep: SAVE.rep, done: SAVE.done, day: SAVE.day || 1, ach: SAVE.ach, started: !!SAVE.started, profit: SAVE.profit || 0, sales: SAVE.sales || 0, m1m: !!SAVE.m1m,
-    ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, complaintSeen: !!SAVE.complaintSeen, corpJob: SAVE.corpJob || null, corpOffer: SAVE.corpOffer || null, corpOfferDay: SAVE.corpOfferDay || 0, corpNext: SAVE.corpNext || 14, wip: SAVE.wip || null, repairQ: SAVE.repairQ || [], clock: SAVE.clock || null, staff: SAVE.staff || {reg:0,restock:0,repair:0},
+    ledger: SAVE.ledger || [], isManager: !!SAVE.isManager, complaintSeen: !!SAVE.complaintSeen, corpJob: SAVE.corpJob || null, corpOffer: SAVE.corpOffer || null, corpOfferDay: SAVE.corpOfferDay || 0, corpNext: SAVE.corpNext || 14, wip: SAVE.wip || null, repairQ: SAVE.repairQ || [], clock: SAVE.clock || null, staff: SAVE.staff || {reg:0,restock:0,repair:0}, deco: SAVE.deco || [], theme: SAVE.theme || {},
     updated: firebase.firestore.FieldValue.serverTimestamp()
   }, {merge:true}).catch(() => setAuthStatus('クラウド保存に失敗しました（通信を確認）'));
 }
@@ -2737,7 +2803,7 @@ async function loadCloud(){
     const d = await Promise.race([ref.get(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
     if(d.exists){
       const j = d.data();
-      SAVE = Object.assign(SAVE, {started:!!j.started, profit:j.profit||0, sales:j.sales||0, m1m:!!j.m1m, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, complaintSeen:!!j.complaintSeen, corpJob:j.corpJob||null, corpOffer:j.corpOffer||null, corpOfferDay:j.corpOfferDay||0, corpNext:j.corpNext||14, wip:j.wip||null, repairQ:Array.isArray(j.repairQ)?j.repairQ:[], clock:j.clock||null, staff:j.staff || {reg:0,restock:0,repair:0}});
+      SAVE = Object.assign(SAVE, {started:!!j.started, profit:j.profit||0, sales:j.sales||0, m1m:!!j.m1m, money:j.money||0, rep:j.rep||0, done:j.done||0, day:j.day||1, ach:Array.isArray(j.ach) ? j.ach : [], ledger:Array.isArray(j.ledger) ? j.ledger : [], isManager:!!j.isManager, complaintSeen:!!j.complaintSeen, corpJob:j.corpJob||null, corpOffer:j.corpOffer||null, corpOfferDay:j.corpOfferDay||0, corpNext:j.corpNext||14, wip:j.wip||null, repairQ:Array.isArray(j.repairQ)?j.repairQ:[], clock:j.clock||null, staff:j.staff || {reg:0,restock:0,repair:0}, deco:Array.isArray(j.deco)?j.deco:[], theme:j.theme||{}});
       writeSave();
     } else { resetSaveData(); saveCloud(); }
     setAuthStatus(`ログイン中：${fbUser.email}（クラウドに保存）`);
@@ -2836,6 +2902,30 @@ function hideSettings(){
   if(settingsFromGame) document.getElementById('start').style.display = 'none';
   else document.getElementById('mainView').style.display = 'block';
 }
+// メールリンクでログイン（パスワードなし）：メールのリンクを開くとそのままログインする
+const LINK_KEY = 'pcws-link-email';
+async function sendLoginLink(){
+  const em = cleanEmail(document.getElementById('authEmail').value);
+  if(!em) return setAuthStatus('メールアドレスを入力してから、もう一度押してください');
+  if(!fbAuth) return setAuthStatus('ログインの準備ができていません');
+  try{
+    await fbAuth.sendSignInLinkToEmail(em, {url: location.href.split('#')[0].split('?')[0], handleCodeInApp: true});
+    try{ localStorage.setItem(LINK_KEY, em); }catch(e){}
+    setAuthStatus('ログイン用のリンクを送りました。メールのリンクを同じ端末・同じブラウザで開いてください（届かない場合は迷惑メールも確認）');
+  }catch(e){ setAuthStatus('送信できません：' + authMsg(e)); }
+}
+async function finishLinkLogin(){
+  if(!fbAuth || !fbAuth.isSignInWithEmailLink(location.href)) return;
+  let em = null; try{ em = localStorage.getItem(LINK_KEY); }catch(e){}
+  if(!em) em = cleanEmail(window.prompt('リンクを送ったメールアドレスを入力してください') || '');
+  if(!em) return setAuthStatus('メールアドレスが分からないので、ログインできません');
+  try{
+    await fbAuth.signInWithEmailLink(em, location.href);
+    try{ localStorage.removeItem(LINK_KEY); }catch(e){}
+    history.replaceState(null, '', location.href.split('?')[0].split('#')[0]);
+    setAuthStatus('メールのリンクでログインしました');
+  }catch(e){ setAuthStatus('リンクでログインできません：' + authMsg(e)); }
+}
 async function sendResetFor(em){
   try{ await fbAuth.sendPasswordResetEmail(em); return '再設定用のメールを送りました。メール内のリンクから新しいパスワードを設定してください（届かない場合は迷惑メールも確認）'; }
   catch(e){ return '送信できません：' + authMsg(e); }
@@ -2869,6 +2959,7 @@ function wireSettingsUI(){
     setSetStatus(await sendResetFor(u.email));
   });
   document.getElementById('setDel').addEventListener('click', deleteAccount);
+  document.getElementById('authLink').addEventListener('click', sendLoginLink);
   document.getElementById('authForgot').addEventListener('click', async () => {
     const em = cleanEmail(document.getElementById('authEmail').value);
     if(!em) return setAuthStatus('メールアドレスを入力してから、もう一度押してください');
@@ -2887,6 +2978,7 @@ function initAuth(){
     firebase.initializeApp(FIREBASE_CONFIG);
     fbAuth = firebase.auth(); fbDb = firebase.firestore();
     cloudLoading = true; setStartEnabled();
+    finishLinkLogin();   // メールのリンクから開いた場合はここでログインする
     fbAuth.onAuthStateChanged(u => {
       if(u && !u.emailVerified && !signingUp){ fbAuth.signOut(); return; }
       const wasIn = !!fbUser;
@@ -2997,7 +3089,7 @@ function corpUnitOrder(j){
 function corpNextAfter(d){ return (Math.floor((d - 1) / 7) + 2) * 7; }
 function corpCancel(reason){
   if(!SAVE.corpJob) return;
-  S.rep = Math.max(0, S.rep - 3);
+  S.rep = S.rep - 3;
   say(`法人依頼「${SAVE.corpJob.client}」を打ち切り：${reason}（評判 −3）`);
   SAVE.corpJob = null; SAVE.corpNext = corpNextAfter(S.day || 1); persist();
 }
@@ -3063,9 +3155,44 @@ document.getElementById('tutNo').addEventListener('click', () => startGame(false
 
 // ===== 店長のちょこっと手伝い =====
 let mgrHelp = null;
-function mgrSleeping(){ return !SAVE.isManager && S.day % 3 === 0 && !mgrHelp; }
+let mgrCov = null;   // 法人の作業中、店長がレジに出る状態
+function mgrSleeping(){ return !SAVE.isManager && S.day % 3 === 0 && !mgrHelp && !mgrCov && !SAVE.corpJob; }   // 法人の日は寝ない
+// 法人の作業中、店長がレジの前まで歩いて対応する（眠そうに前かがみで、Zzz を出す）
+const MGR_TO_REG = [{x:8.5,z:-11.1},{x:8.5,z:-6.2},{x:4,z:-6.2},{x:5.5,z:-1.5},{x:0.4,z:6.6}];
+const MGR_FROM_REG = [{x:5.5,z:-1.5},{x:4,z:-6.2},{x:8.5,z:-6.2},{x:8.5,z:-11.1},{x:10.5,z:-11.1}];
+function startMgrCover(c){
+  if(mgrCov || !MGR_MESH_REF || mgrHelp) return;
+  mgrCov = {phase:'go', wp:0, t:0, c};
+  say('チッ・・何で俺が働かなきゃならねえんだ？');
+}
+function updateMgrCover(dt){
+  if(!mgrCov) return;
+  const m = MGR_MESH_REF; if(!m){ mgrCov = null; return; }
+  const walk = (route, sp) => {
+    const tg = route[mgrCov.wp];
+    const dx = tg.x - m.position.x, dz = tg.z - m.position.z, d = Math.hypot(dx, dz);
+    if(d < 0.05){ mgrCov.wp++; return mgrCov.wp >= route.length; }
+    const step = Math.min(d, sp * dt);
+    m.position.x += dx / d * step; m.position.z += dz / d * step; m.rotation.y = Math.atan2(dx, dz);
+    return false;
+  };
+  mgrCov.t += dt;
+  if(mgrCov.phase === 'go'){
+    if(walk(MGR_TO_REG, 3.5)){ mgrCov.phase = 'serve'; mgrCov.t = 0; m.rotation.y = 0; }
+  } else if(mgrCov.phase === 'serve'){
+    m.rotation.x = 0.12;                                                // 眠そうに少し前かがみ
+    if(mgrCov.t > 0.5 && mgrCov.c){
+      const c = mgrCov.c; mgrCov.c = null;
+      if(c.state === 'wait'){ if(REGC === c) REGC = null; autoServe(c); }
+    }
+    if(mgrCov.t > 2.5){ mgrCov.phase = 'back'; mgrCov.wp = 0; m.rotation.x = 0; }
+  } else if(mgrCov.phase === 'back'){
+    if(walk(MGR_FROM_REG, 3.5)) mgrCov = null;
+  }
+}
 function updateMgrSleep(){
   const m = MGR_MESH_REF; if(!m) return;
+  if(mgrCov){ m.children.forEach(ch => { if(ch.userData.zz) ch.visible = mgrCov.phase === 'serve'; }); return; }
   const sleep = mgrSleeping();
   if(sleep) m.rotation.set(0.45,0,0);                                                  // 机に突っ伏す
   else if(!mgrHelp && m.rotation.x !== 0) m.rotation.x = 0;
@@ -3256,6 +3383,285 @@ function fpsTick(t){
 }
 document.getElementById('setFps').addEventListener('change', e => setFpsOn(e.target.checked));
 setFpsOn(fpsOn());
+// ===== 店の改装（家具・床・壁を自由に置き換えられる。改装ショップで買い、店の中で置き場所を決める） =====
+const DECO_CAT = [
+  {id:'sofa_red', name:'ソファ（赤）', cat:'ソファ・椅子', price:18000, w:1.6, d:0.7},
+  {id:'sofa_blue', name:'ソファ（青）', cat:'ソファ・椅子', price:18000, w:1.6, d:0.7},
+  {id:'sofa_wood', name:'ベンチ（木製）', cat:'ソファ・椅子', price:9000, w:1.4, d:0.5},
+  {id:'chair_wood', name:'椅子（木製）', cat:'ソファ・椅子', price:3000, w:0.5, d:0.5},
+  {id:'chair_office', name:'事務椅子', cat:'ソファ・椅子', price:6000, w:0.6, d:0.6},
+  {id:'stool', name:'丸スツール', cat:'ソファ・椅子', price:1200, w:0.4, d:0.4},
+  {id:'table_round', name:'丸テーブル', cat:'テーブル・棚', price:5000, w:1.0, d:1.0},
+  {id:'table_long', name:'長テーブル', cat:'テーブル・棚', price:7000, w:2.2, d:0.9},
+  {id:'bookshelf', name:'本棚', cat:'テーブル・棚', price:9000, w:1.2, d:0.4},
+  {id:'cabinet', name:'金属の収納棚', cat:'テーブル・棚', price:7000, w:1.0, d:0.5},
+  {id:'counter_white', name:'カウンター（白）', cat:'テーブル・棚', price:15000, w:2.0, d:0.7},
+  {id:'parts_rack', name:'パーツの棚', cat:'テーブル・棚', price:12000, w:1.6, d:0.4},
+  {id:'showcase', name:'ショーケース', cat:'テーブル・棚', price:9500, w:0.8, d:0.5},
+  {id:'rug_round', name:'丸いラグ', cat:'その他', price:6000, w:1.6, d:1.6, walk:true},
+  {id:'rug_rect', name:'長方形ラグ', cat:'その他', price:6000, w:2.2, d:1.4, walk:true},
+  {id:'cat_bed', name:'猫のベッド', cat:'その他', price:2000, w:0.6, d:0.6},
+  {id:'trash', name:'ゴミ箱', cat:'その他', price:500, w:0.35, d:0.35},
+  {id:'toolbox', name:'工具箱', cat:'工房グッズ', price:1800, w:0.6, d:0.4},
+  {id:'pc_display', name:'展示用PC', cat:'工房グッズ', price:9000, w:0.6, d:0.5},
+  {id:'vending', name:'自販機', cat:'電気製品', price:25000, w:1.0, d:0.8},
+  {id:'piano', name:'電子ピアノ', cat:'電気製品', price:30000, w:1.3, d:0.45},
+  {id:'arcade', name:'ゲーム筐体', cat:'電気製品', price:40000, w:0.8, d:0.8},
+  {id:'fan', name:'扇風機', cat:'電気製品', price:3500, w:0.4, d:0.4},
+  {id:'aquarium', name:'水槽', cat:'装飾', price:22000, w:1.2, d:0.5},
+  {id:'sign_stand', name:'立て看板（OPEN）', cat:'装飾', price:5000, w:0.5, d:0.4},
+  {id:'poster', name:'立てポスター', cat:'装飾', price:2500, w:0.8, d:0.2},
+  {id:'flag', name:'旗', cat:'装飾', price:2000, w:0.3, d:0.3},
+  {id:'clock', name:'柱時計', cat:'装飾', price:6000, w:0.5, d:0.3},
+  {id:'neon_sign', name:'ネオン看板', cat:'装飾', price:9000, w:0.9, d:0.2},
+  {id:'plant_big', name:'大きい観葉植物', cat:'植物', price:4000, w:0.6, d:0.6},
+  {id:'plant_small', name:'小さな鉢植え', cat:'植物', price:1200, w:0.3, d:0.3},
+  {id:'bonsai', name:'盆栽', cat:'植物', price:2800, w:0.4, d:0.4},
+  {id:'lamp_floor', name:'フロアランプ', cat:'照明', price:4000, w:0.4, d:0.4},
+  {id:'lamp_desk', name:'デスクライト', cat:'照明', price:2500, w:0.3, d:0.3},
+  {id:'lamp_pendant', name:'ペンダントライト（天井）', cat:'照明', price:8000, w:0.6, d:0.6, hang:2.4, walk:true},
+  {id:'spot_stand', name:'スポットライト', cat:'照明', price:5500, w:0.4, d:0.4},
+];
+const DECO_BY = {}; DECO_CAT.forEach(x => DECO_BY[x.id] = x);
+const DECO_FLOORS = [{id:'tile_grey', name:'タイル（灰・初期）', price:0}, {id:'tile_white', name:'タイル（白）', price:5000}, {id:'wood', name:'木の床', price:9000}, {id:'carpet', name:'青いカーペット', price:7000}, {id:'marble', name:'大理石（黒）', price:14000}, {id:'checker', name:'赤白チェック', price:8000}];
+const DECO_WALLS = [{id:'navy', name:'紺（初期）', price:0}, {id:'cream', name:'クリーム', price:4000}, {id:'mint', name:'ミント', price:4000}, {id:'brick', name:'レンガ', price:8000}, {id:'woodwall', name:'羽目板（木）', price:8000}, {id:'concrete', name:'打ちっぱなし', price:6000}];
+const DECO_FORBID = [{x0:-3.2,x1:2.8,z0:8.8,z1:11.2}, {x0:9.5,x1:11,z0:7.2,z1:11}];   // 入口・客の通り道・出口
+let DECO_HELD = null, DECO_GHOST = null, DECO_PAD = null, DECO_MESHES = [], decoSig = '', decoTick = 0;
+
+// 家具用の質感（布と木の細かい織り目・ざらつき）。1枚だけ作って使い回す
+let FURN_TEX = null;
+function furnTex(){
+  if(FURN_TEX) return FURN_TEX;
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#ffffff'; g.fillRect(0,0,128,128);
+  for(let i=0;i<700;i++){ g.fillStyle = Math.random() < 0.5 ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)'; g.fillRect(Math.random()*128, Math.random()*128, 1+Math.random()*2, 1); }
+  for(let y=0;y<128;y+=16){ g.fillStyle = 'rgba(0,0,0,0.05)'; g.fillRect(0,y,128,2); }   // 織り目の筋
+  FURN_TEX = new THREE.CanvasTexture(c); FURN_TEX.wrapS = FURN_TEX.wrapT = THREE.RepeatWrapping;
+  return FURN_TEX;
+}
+// 家具の材質：色に質感を重ねたもの
+const furnMat = c => { const m = new THREE.MeshLambertMaterial({color:c, map:furnTex()}); return m; };
+// 角の輪郭線（暗い色）。箱の形がはっきり見える
+const EDGE_CACHE = {};
+function edgeLine(w,h,d,c){
+  const key = [w,h,d].join(',');
+  const geo = EDGE_CACHE[key] || (EDGE_CACHE[key] = new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d)));
+  const col = new THREE.Color(c).multiplyScalar(0.45);
+  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({color: col}));
+}
+
+// 家具の模型（前が +z 向き）
+function decoModel(id){
+  const g = new THREE.Group();
+  const b = (w,h,d,c,x,y,z) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), furnMat(c)); m.position.set(x,y,z); g.add(m);
+    if(Math.min(w,h,d) > 0.03){ const e = edgeLine(w,h,d,c); e.position.set(x,y,z); g.add(e); }
+    return m;
+  };
+  const cy = (r,h,c,x,y,z,seg=18) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,seg), furnMat(c)); m.position.set(x,y,z); g.add(m); return m; };
+  const sp = (r,c,x,y,z) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r,12,10), furnMat(c)); m.position.set(x,y,z); g.add(m); return m; };
+  const lit = (w,h,d,c,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshBasicMaterial({color:c})); m.position.set(x,y,z); g.add(m); return m; };
+  const glass = (w,h,d,c,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshLambertMaterial({color:c, transparent:true, opacity:0.3, depthWrite:false})); m.position.set(x,y,z); g.add(m); return m; };
+  const plane = (w,h,map,x,y,z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({map})); m.position.set(x,y,z); g.add(m); return m; };
+  const PAL = [0x3dd6ff,0xe74c3c,0x2ecc71,0xf1c40f,0x9b59b6,0xecf0f1];
+  const BK = [0x9b3b3b,0x3b6e9b,0x3b9b5e,0xc9a227,0x6b3b9b,0xd9d9d9];
+  switch(id){
+    case 'sofa_red': case 'sofa_blue': { const red = id === 'sofa_red'; const c = red ? 0xb03030 : 0x2f5fa8, cd = red ? 0x8a2222 : 0x234a86;
+      b(1.6,0.3,0.7,c,0,0.2,0); b(1.6,0.45,0.18,cd,0,0.5,-0.26); b(0.16,0.4,0.7,cd,-0.72,0.42,0); b(0.16,0.4,0.7,cd,0.72,0.42,0); break; }
+    case 'sofa_wood': b(1.4,0.1,0.45,0x9a6b3f,0,0.45,0); b(1.4,0.35,0.06,0x8a5c34,0,0.7,-0.2); for(const x of [-0.6,0.6]) b(0.08,0.45,0.4,0x6b4a2a,x,0.22,0); break;
+    case 'chair_wood': b(0.45,0.06,0.45,0x9a6b3f,0,0.46,0); for(const x of [-0.19,0.19]) for(const z of [-0.19,0.19]) b(0.05,0.46,0.05,0x6b4a2a,x,0.23,z); b(0.45,0.45,0.05,0x9a6b3f,0,0.72,-0.2); break;
+    case 'chair_office': b(0.55,0.08,0.55,0x2a2d34,0,0.5,0); b(0.5,0.5,0.06,0x2a2d34,0,0.8,-0.25); cy(0.03,0.45,0x888e99,0,0.25,0); cy(0.3,0.04,0x444a55,0,0.02,0); break;
+    case 'stool': cy(0.2,0.45,0x7d5a3b,0,0.22,0); cy(0.22,0.06,0xb0884f,0,0.47,0); break;
+    case 'table_round': cy(0.5,0.05,0xd9c7a9,0,0.85,0,28); cy(0.06,0.85,0x6b5040,0,0.42,0,8); cy(0.3,0.04,0x6b5040,0,0.02,0,16); break;
+    case 'table_long': b(2.2,0.06,0.9,0x8c6b52,0,0.9,0); for(const x of [-1,1]) for(const z of [-0.38,0.38]) b(0.08,0.87,0.08,0x4a3428,x,0.435,z); break;
+    case 'bookshelf': b(1.2,2.0,0.4,0x7a5532,0,1.0,0); for(let i=0;i<4;i++){ b(1.1,0.04,0.36,0x5a3d24,0,0.25+i*0.5,0.01); for(let j=0;j<8;j++) b(0.08,0.3,0.25,BK[(i+j)%BK.length],-0.5+j*0.13,0.42+i*0.5,0.02); } break;
+    case 'cabinet': b(1.0,1.6,0.5,0x8d949e,0,0.8,0); b(0.01,1.5,0.02,0x5d646e,0,0.8,0.26); b(0.03,0.2,0.03,0xdddddd,-0.1,0.8,0.27); b(0.03,0.2,0.03,0xdddddd,0.1,0.8,0.27); break;
+    case 'counter_white': b(2.0,1.0,0.7,0xeef1f5,0,0.5,0); b(2.1,0.05,0.8,0xd7dde5,0,1.02,0); break;
+    case 'parts_rack': b(1.6,2.0,0.4,0x4a4f5e,0,1.0,0); for(let i=0;i<4;i++){ b(1.5,0.04,0.38,0x2e323d,0,0.3+i*0.5,0.01); for(let j=0;j<5;j++) b(0.22,0.14,0.28,PAL[(i*5+j)%PAL.length],-0.6+j*0.3,0.37+i*0.5,0.02); } break;
+    case 'showcase': b(0.8,0.4,0.5,0x7a5532,0,0.2,0); glass(0.8,0.9,0.5,0xbfe6ff,0,0.85,0); for(let i=0;i<3;i++) lit(0.18,0.18,0.18,PAL[i],-0.2+i*0.2,0.5,0); break;
+    case 'rug_round': cy(0.8,0.02,0x9b4d6b,0,0.01,0,40); cy(0.55,0.025,0xd98aa6,0,0.012,0,40); break;
+    case 'rug_rect': b(2.2,0.02,1.4,0x3f6e5a,0,0.01,0); b(1.9,0.025,1.1,0x5f8f7a,0,0.012,0); break;
+    case 'cat_bed': cy(0.3,0.1,0xb07a4f,0,0.05,0); cy(0.27,0.04,0xf0d9a8,0,0.11,0); break;
+    case 'trash': cy(0.17,0.5,0x6b7280,0,0.25,0,16); cy(0.19,0.04,0x4b5563,0,0.52,0,16); break;
+    case 'toolbox': b(0.6,0.25,0.4,0xc0392b,0,0.125,0); b(0.2,0.04,0.05,0x222222,0,0.28,0); break;
+    case 'pc_display': b(0.4,0.45,0.4,0x2a2f38,0,0.23,0); lit(0.36,0.25,0.02,0x3dd6ff,0,0.6,0.2); break;
+    case 'vending': b(1.0,1.8,0.8,0xe6eaf0,0,0.9,0); b(0.7,1.0,0.02,0x1d2a36,0,1.1,0.41); for(let i=0;i<3;i++) for(let j=0;j<2;j++) lit(0.12,0.2,0.02,PAL[(i+j*3)%PAL.length],-0.2+i*0.2,0.9+j*0.3,0.43); b(0.3,0.15,0.02,0x222222,0,0.4,0.41); break;
+    case 'piano': b(1.3,1.0,0.45,0x151515,0,0.8,0); b(1.1,0.03,0.15,0xf2f2f2,0,0.7,0.27); for(const x of [-0.6,0.6]) b(0.05,0.3,0.4,0x111111,x,0.15,0); break;
+    case 'arcade': b(0.8,1.8,0.8,0x2b1d4a,0,0.9,0); lit(0.6,0.4,0.02,0x3dd6ff,0,1.3,0.41); lit(0.7,0.2,0.02,0xff3da6,0,1.75,0.41); cy(0.02,0.15,0x222222,0,0.98,0.3,6); break;
+    case 'fan': cy(0.04,1.0,0x888e99,0,0.5,0,8); cy(0.2,0.04,0x444a55,0,0.02,0,16); cy(0.18,0.12,0x2c2f36,0,1.05,0,16); cy(0.16,0.02,0xdedede,0,1.05,0.1,16); break;
+    case 'aquarium': b(1.2,0.7,0.5,0x4a4f5e,0,0.35,0); glass(1.1,0.55,0.42,0x7fd1ff,0,1.0,0); for(let i=0;i<3;i++) sp(0.04,PAL[i+1],-0.3+i*0.3,0.95,0); break;
+    case 'sign_stand': b(0.5,1.2,0.03,0x222222,0,0.6,0); b(0.04,0.8,0.04,0x888888,-0.2,0.4,0); b(0.04,0.8,0.04,0x888888,0.2,0.4,0); plane(0.44,0.5, labelTex([{text:'OPEN', size:60}], '#1d2030', '#ffd166', 256, 128), 0,0.9,0.02); break;
+    case 'poster': b(0.8,1.2,0.04,0x333333,0,0.6,0); plane(0.72,1.12, labelTex([{text:'工房の', size:40}, {text:'ポスター', size:40}], '#1f2a44', '#ffd166', 256, 384), 0,0.6,0.03); break;
+    case 'flag': cy(0.02,2.2,0x888e99,0,1.1,0,8); b(0.6,0.4,0.01,0xd9534f,0.3,1.9,0); break;
+    case 'clock': b(0.5,2.0,0.3,0x6b4a2a,0,1.0,0); { const face = cy(0.18,0.02,0xf4efe2,0,1.6,0.17,24); face.rotation.x = Math.PI/2; } b(0.02,0.14,0.01,0x222222,0,1.6,0.18); break;
+    case 'neon_sign': b(0.9,0.5,0.04,0x15161b,0,1.0,0); lit(0.8,0.4,0.01,0xff3da6,0,1.0,0.03); lit(0.6,0.06,0.01,0x3dd6ff,0,1.0,0.04); b(0.04,0.8,0.04,0x333333,0,0.4,-0.02); break;
+    case 'plant_big': cy(0.25,0.5,0xb2643a,0,0.25,0,20); for(let i=0;i<7;i++){ const a = i*Math.PI*2/7; sp(0.22,0x2f8a4a,Math.cos(a)*0.18,0.8+(i%3)*0.12,Math.sin(a)*0.18); } sp(0.22,0x3fa35a,0,1.2,0); break;
+    case 'plant_small': cy(0.12,0.16,0xc9733f,0,0.08,0); for(let i=0;i<4;i++){ const a = i*Math.PI/2; sp(0.08,0x3fa35a,Math.cos(a)*0.06,0.22,Math.sin(a)*0.06); } break;
+    case 'bonsai': b(0.36,0.14,0.26,0x8a5a3a,0,0.07,0); cy(0.02,0.3,0x6b4a2a,0,0.27,0,6); sp(0.12,0x2f7a3a,0,0.42,0); sp(0.1,0x3f8a4a,-0.08,0.36,0.04); sp(0.09,0x2f7a3a,0.08,0.38,-0.03); break;
+    case 'lamp_floor': cy(0.18,0.04,0x222222,0,0.02,0,16); cy(0.02,1.6,0x333333,0,0.8,0,8); cy(0.2,0.3,0xf5e6c8,0,1.65,0,16); break;
+    case 'lamp_desk': b(0.2,0.02,0.2,0x333333,0,0.01,0); cy(0.015,0.5,0x333333,0,0.26,-0.05,8); b(0.2,0.04,0.08,0xf5e6c8,0,0.52,0); break;
+    case 'lamp_pendant': cy(0.01,1.6,0x222222,0,0.8,0,6); cy(0.22,0.18,0x2b2f3a,0,0,0,20); lit(0.14,0.06,0.14,0xffe6b0,0,-0.1,0); break;
+    case 'spot_stand': cy(0.02,1.8,0x333333,0,0.9,0,6); b(0.2,0.2,0.2,0x222222,0,1.8,0.1); lit(0.16,0.04,0.02,0xfff3d6,0,1.7,0.22); break;
+    default: b(0.5,0.5,0.5,0x888888,0,0.25,0);
+  }
+  return g;
+}
+
+// 床と壁の模様（一度作ったものは使い回す）
+const DECO_TEX = {};
+function themeTex(id, isFloor){
+  const key = id + (isFloor ? ':f' : ':w');
+  if(DECO_TEX[key]) return DECO_TEX[key];
+  const c = document.createElement('canvas'); c.width = 256; c.height = 256; const g = c.getContext('2d');
+  const checker = (a,b) => { for(let i=0;i<2;i++) for(let j=0;j<2;j++){ g.fillStyle = (i+j)%2 ? b : a; g.fillRect(i*128,j*128,128,128); } };
+  switch(id){
+    case 'tile_white': checker('#e8ecf2','#d4dbe6'); g.strokeStyle = '#b9c2d0'; g.lineWidth = 3; g.strokeRect(0,0,256,256); break;
+    case 'wood': for(let i=0;i<8;i++){ g.fillStyle = i%2 ? '#8a5c34' : '#a4744a'; g.fillRect(0,i*32,256,32); g.strokeStyle = 'rgba(60,30,10,0.35)'; g.beginPath(); g.moveTo(0,i*32); g.lineTo(256,i*32); g.stroke(); } break;
+    case 'carpet': g.fillStyle = '#2e4a7a'; g.fillRect(0,0,256,256); for(let i=0;i<900;i++){ g.fillStyle = 'rgba(120,160,230,0.3)'; g.fillRect(Math.random()*256, Math.random()*256, 2, 2); } break;
+    case 'marble': g.fillStyle = '#22252d'; g.fillRect(0,0,256,256); g.strokeStyle = 'rgba(230,230,240,0.35)'; g.lineWidth = 2; for(let i=0;i<10;i++){ let x = Math.random()*256, y = 0; g.beginPath(); g.moveTo(x,y); for(let k=0;k<6;k++){ x += (Math.random()-0.5)*40; y += 44; g.lineTo(x,y); } g.stroke(); } break;
+    case 'checker': checker('#b03030','#f2f2f2'); break;
+    case 'cream': g.fillStyle = '#e9dcc0'; g.fillRect(0,0,256,256); g.fillStyle = 'rgba(255,255,255,0.05)'; for(let x=0;x<256;x+=32) g.fillRect(x,0,16,256); break;
+    case 'mint': g.fillStyle = '#bfe3d2'; g.fillRect(0,0,256,256); g.fillStyle = 'rgba(255,255,255,0.06)'; for(let x=0;x<256;x+=32) g.fillRect(x,0,16,256); break;
+    case 'brick': g.fillStyle = '#8a4a3a'; g.fillRect(0,0,256,256); g.strokeStyle = '#d8c8b0'; g.lineWidth = 3; for(let r=0;r<8;r++){ const y = r*32; g.beginPath(); g.moveTo(0,y); g.lineTo(256,y); g.stroke(); for(let x=(r%2)*32; x<256; x+=64){ g.beginPath(); g.moveTo(x,y); g.lineTo(x,y+32); g.stroke(); } } break;
+    case 'woodwall': for(let i=0;i<8;i++){ g.fillStyle = i%2 ? '#7a5532' : '#8a6240'; g.fillRect(i*32,0,32,256); } break;
+    case 'concrete': g.fillStyle = '#7d8189'; g.fillRect(0,0,256,256); for(let i=0;i<1500;i++){ g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'; g.fillRect(Math.random()*256, Math.random()*256, 2, 2); } break;
+    default:
+      if(isFloor){ checker('#4d5365','#5b6070'); g.strokeStyle = '#3a3f4d'; g.lineWidth = 3; g.strokeRect(0,0,256,256); }
+      else { g.fillStyle = '#2e3550'; g.fillRect(0,0,256,256); for(let x=0;x<256;x+=32){ g.fillStyle = 'rgba(255,255,255,0.03)'; g.fillRect(x,0,16,256); } g.fillStyle = '#6a4a30'; g.fillRect(0,196,256,60); g.fillStyle = '#3d2a1c'; g.fillRect(0,192,256,6); }
+  }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  if(isFloor) t.repeat.set(12,12); else t.repeat.set(4,1);
+  DECO_TEX[key] = t; return t;
+}
+function applyTheme(){
+  const th = SAVE.theme || {};
+  FLOOR_MESH.material.map = themeTex(th.floor || 'tile_grey', true); FLOOR_MESH.material.needsUpdate = true;
+  wallMat.map = themeTex(th.wall || 'navy', false); wallMat.needsUpdate = true;
+}
+
+// 置いた家具の反映（保存データから作り直す）
+function decoFoot(it, x, z, rot){
+  const sw = rot % 2 === 1, w = sw ? it.d : it.w, d = sw ? it.w : it.d;
+  return {x0:x-w/2, x1:x+w/2, z0:z-d/2, z1:z+d/2, w, d};
+}
+function rebuildDeco(){
+  DECO_MESHES.forEach(m => scene.remove(m)); DECO_MESHES = [];
+  for(let i = OBST.length-1; i >= 0; i--) if(OBST[i].deco) OBST.splice(i,1);
+  (SAVE.deco || []).forEach(d => {
+    const it = DECO_BY[d.id]; if(!it) return;
+    const g = decoModel(d.id); g.position.set(d.x, it.hang || 0, d.z); g.rotation.y = d.rot * Math.PI/2;
+    scene.add(g); DECO_MESHES.push(g);
+    if(!it.walk){ const f = decoFoot(it, d.x, d.z, d.rot); OBST.push({x0:f.x0, x1:f.x1, z0:f.z0, z1:f.z1, deco:true}); }
+  });
+}
+function syncDeco(){
+  const sig = JSON.stringify([SAVE.deco || [], SAVE.theme || {}]);
+  if(sig === decoSig) return;
+  decoSig = sig; rebuildDeco(); applyTheme();
+}
+
+// 置けるかどうか（理由を返す。置ける時は null）
+function decoCheck(it, x, z, rot){
+  const f = decoFoot(it, x, z, rot);
+  if(f.x0 < -10.6 || f.x1 > 10.6 || f.z0 < -10.6 || f.z1 > 10.6) return '部屋の外には置けません';
+  if(Math.abs(camera.position.x - x) < f.w/2 + 0.25 && Math.abs(camera.position.z - z) < f.d/2 + 0.25) return 'そこに立っているので置けません';
+  if(it.walk) return null;
+  for(const q of DECO_FORBID) if(!(f.x1 <= q.x0 || f.x0 >= q.x1 || f.z1 <= q.z0 || f.z0 >= q.z1)) return 'お客さんの通り道・出入口の前には置けません';
+  for(const o of OBST) if(!(o.x1 <= f.x0 || o.x0 >= f.x1 || o.z1 <= f.z0 || o.z0 >= f.z1)) return o.deco ? '他の家具とぶつかります' : '壁・カウンターなどとぶつかります';
+  return null;
+}
+
+// 配置モード：照準（画面の中央）の先に、半透明の家具と色つきの床の目印を出す
+const DECO_BAR = document.createElement('div');
+DECO_BAR.style.cssText = 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:none;gap:8px;z-index:60;background:rgba(10,12,20,0.75);padding:8px 10px;border-radius:12px;flex-wrap:wrap;justify-content:center';
+DECO_BAR.innerHTML = '<button class="btn primary" data-deco="place">ここに置く</button><button class="btn" data-deco="rot">回転（R）</button><button class="btn" data-deco="cancel">やめる</button>';
+document.body.appendChild(DECO_BAR);
+DECO_BAR.addEventListener('pointerdown', e => {
+  const b = e.target.closest && e.target.closest('[data-deco]'); if(!b) return;
+  e.preventDefault(); e.stopPropagation(); ensureAudio();
+  const k = b.dataset.deco;
+  if(k === 'place') decoPlace(); else if(k === 'rot') decoRotate(); else if(k === 'cancel'){ decoCancelGhost(); say('配置をやめた。'); }
+});
+window.addEventListener('keydown', e => { if((e.key === 'r' || e.key === 'R') && DECO_HELD) decoRotate(); });
+function decoStartPlace(id){
+  decoCancelGhost();
+  DECO_HELD = {id, rot:0, x:0, z:0, ok:false};
+  DECO_GHOST = decoModel(id); scene.add(DECO_GHOST);
+  DECO_PAD = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({color:0x2fbf7f, transparent:true, opacity:0.45, depthWrite:false}));
+  DECO_PAD.rotation.x = -Math.PI/2; DECO_PAD.position.y = 0.012; scene.add(DECO_PAD);
+  DECO_BAR.style.display = 'flex';
+}
+function decoCancelGhost(){
+  if(DECO_GHOST){ scene.remove(DECO_GHOST); DECO_GHOST = null; }
+  if(DECO_PAD){ scene.remove(DECO_PAD); DECO_PAD = null; }
+  DECO_HELD = null; DECO_BAR.style.display = 'none';
+}
+function updateDecoGhost(){
+  if(!DECO_HELD || !DECO_GHOST) return;
+  const it = DECO_BY[DECO_HELD.id];
+  const fx = -Math.sin(yaw), fz = -Math.cos(yaw);   // 視線の向き（移動と同じ計算）
+  const x = Math.round((camera.position.x + fx*2.2)*2)/2, z = Math.round((camera.position.z + fz*2.2)*2)/2;
+  DECO_HELD.x = x; DECO_HELD.z = z;
+  DECO_GHOST.position.set(x, it.hang || 0, z); DECO_GHOST.rotation.y = DECO_HELD.rot * Math.PI/2;
+  const fp = decoFoot(it, x, z, DECO_HELD.rot);
+  DECO_PAD.position.set(x, 0.012, z); DECO_PAD.scale.set(fp.w, fp.d, 1);
+  const why = decoCheck(it, x, z, DECO_HELD.rot);
+  DECO_HELD.ok = !why; DECO_PAD.material.color.setHex(why ? 0xd9534f : 0x2fbf7f);
+}
+function decoRotate(){ if(!DECO_HELD) return; DECO_HELD.rot = (DECO_HELD.rot + 1) % 4; SFX.click(); }
+function decoPlace(){
+  if(!DECO_HELD) return;
+  const it = DECO_BY[DECO_HELD.id];
+  const why = decoCheck(it, DECO_HELD.x, DECO_HELD.z, DECO_HELD.rot);
+  if(why){ SFX.error(); return say(`❌ ${why}`); }
+  if(S.money < it.price){ SFX.error(); return say(`お金が足りない（${yen(it.price)}必要）。`); }
+  S.money -= it.price; S.dayExpense = (S.dayExpense || 0) + it.price;
+  SAVE.deco = (SAVE.deco || []).concat([{id: it.id, x: DECO_HELD.x, z: DECO_HELD.z, rot: DECO_HELD.rot}]);
+  persist(); SFX.place(); say(`${it.name}を置いた（${yen(it.price)}）。`);
+}
+// 近くの家具を撤去（売値の半額で売る）
+function decoRemoveNear(){
+  const list = SAVE.deco || []; let best = -1, bd = 2.2;
+  list.forEach((d,i) => { const dd = Math.hypot(camera.position.x - d.x, camera.position.z - d.z); if(dd < bd){ bd = dd; best = i; } });
+  if(best < 0) return say('近くに撤去できる家具がない（2マス以内に近づいてください）。');
+  const d = list[best], it = DECO_BY[d.id], refund = Math.floor(it.price / 2);
+  S.money += refund; SAVE.deco = list.filter((_,i) => i !== best); persist(); SFX.click();
+  say(`${it.name}を撤去した（${yen(refund)}で売却）。`);
+}
+// 床・壁の張り替え（その場で変わる）
+function decoBuyTheme(kind, id){
+  const list = kind === 'floor' ? DECO_FLOORS : DECO_WALLS;
+  const t = list.find(x => x.id === id); if(!t) return;
+  const cur = (SAVE.theme || {})[kind] || (kind === 'floor' ? 'tile_grey' : 'navy');
+  if(cur === id) return say('すでにこの内装です。');
+  if(S.money < t.price){ SFX.error(); return say(`お金が足りない（${yen(t.price)}必要）。`); }
+  S.money -= t.price; S.dayExpense = (S.dayExpense || 0) + t.price;
+  SAVE.theme = Object.assign({floor:'tile_grey', wall:'navy'}, SAVE.theme || {}); SAVE.theme[kind] = id;
+  persist(); SFX.click(); say(`${kind === 'floor' ? '床' : '壁'}を「${t.name}」に張り替えた。`);
+}
+// 改装ショップ（カタログ）
+function openDecoShop(){
+  SFX.open();
+  const cats = [...new Set(DECO_CAT.map(x => x.cat))];
+  const furn = cats.map(c => `<p style="margin:8px 0 2px"><b>${c}</b></p>` + DECO_CAT.filter(x => x.cat === c).map(x => `<button class="btn" data-act="decoPick" data-arg="${x.id}" style="margin:2px;font-size:13px">${x.name}<br><span class="gold">${yen(x.price)}</span></button>`).join('')).join('');
+  const theme = (list, kind) => list.map(x => `<button class="btn" data-act="decoTheme" data-arg="${kind}|${x.id}" style="margin:2px;font-size:13px">${x.name}${x.price ? '<br><span class="gold">' + yen(x.price) + '</span>' : ''}</button>`).join('');
+  openPanel(`<h3>改装ショップ</h3>
+    <div style="max-height:60vh;overflow-y:auto;text-align:left">
+    <p class="muted">家具は買ってから、店の中で置き場所を決めます（R で回転）。床と壁はその場で張り替えます。</p>
+    ${furn}
+    <p style="margin:8px 0 2px"><b>床</b></p>${theme(DECO_FLOORS, 'floor')}
+    <p style="margin:8px 0 2px"><b>壁</b></p>${theme(DECO_WALLS, 'wall')}
+    <p style="margin:8px 0 2px"><b>その他</b></p>
+    <button class="btn" data-act="decoRemove" style="margin:2px;font-size:13px">近くの家具を撤去（2マス以内・半額で売る）</button>
+    </div>
+    <button class="btn" data-act="close">閉じる</button>`, true);
+}
+Object.assign(ACT, {
+  decoPick(arg){ const it = DECO_BY[arg]; if(!it) return; closePanel(); if(S.money < it.price){ SFX.error(); return say(`お金が足りない（${yen(it.price)}必要）。`); } decoStartPlace(arg); say(`${it.name}を選んだ。照準の場所に置けます（R で回転、「ここに置く」で設置）。`); },
+  decoTheme(arg){ const [kind, id] = String(arg).split('|'); closePanel(); decoBuyTheme(kind, id); },
+  decoRemove(){ closePanel(); decoRemoveNear(); },
+});
+
 function loop(t){
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
   if(fpsEl.style.display !== 'none') fpsTick(t);
@@ -3263,7 +3669,10 @@ function loop(t){
   if(gameStarted && !paused && !dayEnding){
     updateCustomers(dt);
     updateMgrHelp(dt);
+    updateMgrCover(dt);
     updateMgrSleep();
+    updateDecoGhost();
+    if(++decoTick % 30 === 0) syncDeco();
     restockT += dt; if(restockT >= restockPeriod()){ restockT = 0; restockAll(); }
     dayClock += dt; if(dayClock >= DAY_SEC){ dayClock = 0; endOfDay(); }
   }
